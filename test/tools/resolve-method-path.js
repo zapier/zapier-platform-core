@@ -6,7 +6,7 @@ const appDefinition = require('../userapp');
 const resolveMethodPath = require('../../src/tools/resolve-method-path');
 const schemaTools = require('../../src/tools/schema');
 
-describe.only('resolve-method-path', () => {
+describe('resolve-method-path', () => {
   const app = schemaTools.prepareApp(appDefinition);
 
   it('should resolve a request method object with a url', () => {
