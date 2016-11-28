@@ -9,14 +9,14 @@ const schemaTools = require('../../src/tools/schema');
 describe('resolve-method-path', () => {
   const app = schemaTools.prepareApp(appDefinition);
 
-  it('should resolve full path', () => {
-    resolveMethodPath(app, 'resources.contact.list.operation.perform')
-      .should.eql('resources.contact.list.operation.perform');
-  });
-
   it('should resolve a request method object with a url', () => {
     resolveMethodPath(app, app.resources.contact.list.operation.perform)
       .should.eql('resources.contact.list.operation.perform');
+  });
+
+  it('should resolve an inputFields array', () => {
+    resolveMethodPath(app, app.resources.contact.list.operation.inputFields)
+      .should.eql('resources.contact.list.operation.inputFields');
   });
 
   it('should resolve a function', () => {
@@ -30,29 +30,15 @@ describe('resolve-method-path', () => {
       .should.eql('hydrators.getBigStuff');
   });
 
-  it('should resolve shorthand notation', () => {
-    resolveMethodPath(app, 'contact.list')
-      .should.eql('resources.contact.list.operation.perform');
-
-    resolveMethodPath(app, 'getBigStuff')
-      .should.eql('hydrators.getBigStuff');
-
-    resolveMethodPath(app, 'triggers.contactList')
-      .should.eql('triggers.contactList.operation.perform');
-
-    resolveMethodPath(app, 'contactList')
-      .should.eql('triggers.contactList.operation.perform');
-  });
-
   it('should resolve authentication paths', () => {
     appDefinition.authentication = {
       test: {},
       oauth2Config: {getAccessToken: {}}
     };
     const authApp = schemaTools.prepareApp(appDefinition);
-    resolveMethodPath(authApp, 'authentication.test')
+    resolveMethodPath(authApp, appDefinition.authentication.test)
       .should.eql('authentication.test');
-    resolveMethodPath(authApp, 'authentication.oauth2Config.getAccessToken')
+    resolveMethodPath(authApp, appDefinition.authentication.oauth2Config.getAccessToken)
       .should.eql('authentication.oauth2Config.getAccessToken');
   });
 });
