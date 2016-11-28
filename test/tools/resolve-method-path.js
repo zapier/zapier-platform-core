@@ -6,7 +6,7 @@ const appDefinition = require('../userapp');
 const resolveMethodPath = require('../../src/tools/resolve-method-path');
 const schemaTools = require('../../src/tools/schema');
 
-describe('resolve-method-path', () => {
+describe.only('resolve-method-path', () => {
   const app = schemaTools.prepareApp(appDefinition);
 
   it('should resolve a request method object with a url', () => {
@@ -32,8 +32,8 @@ describe('resolve-method-path', () => {
 
   it('should resolve authentication paths', () => {
     appDefinition.authentication = {
-      test: {},
-      oauth2Config: {getAccessToken: {}}
+      test: () => {},
+      oauth2Config: {getAccessToken: () => {}}
     };
     const authApp = schemaTools.prepareApp(appDefinition);
     resolveMethodPath(authApp, appDefinition.authentication.test)

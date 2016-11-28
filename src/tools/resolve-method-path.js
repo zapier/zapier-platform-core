@@ -3,9 +3,6 @@
 const _ = require('lodash');
 const dataTools = require('./data');
 
-const quote = (s) => "'" + s + "'";
-const join = (list) => list.map(quote).join(', ');
-
 const isRequestMethod = needle => typeof needle === 'object' && typeof needle.url === 'string';
 
 /*
@@ -16,30 +13,17 @@ const isRequestMethod = needle => typeof needle === 'object' && typeof needle.ur
 
 */
 const resolveMethodPath = (app, needle) => {
-  let possibilities;
-
   // can be a function (directly callable), an array (like inputFields) or a path itself
-  if (typeof needle === 'function' || _.isArray(needle) || isRequestMethod(needle)) {
-    const path = dataTools.findMapDeep(app, needle);
-    if (!path) {
-      throw new Error('We could not find your function, is it registered somewhere on your app?');
-    }
-    possibilities = [path];
-  } else {
-    throw new Error('You must pass in a function/array found (via ===) somewhere ob your App definition.');
+  if (!(typeof needle === 'function' || _.isArray(needle) || isRequestMethod(needle))) {
+    throw new Error('You must pass in a function/array.');
   }
 
-  const paths = possibilities.filter(path => _.get(app, path) !== undefined);
-
-  if (!paths.length) {
-    throw new Error(`${quote(needle)} is not a valid full path / shorthand path. We checked ${join(possibilities)}.`);
+  const path = dataTools.findMapDeep(app, needle);
+  if (!path) {
+    throw new Error('We could not find (via ===) your function/array anywhere on your App definition.');
   }
 
-  if (paths.length > 1) {
-    throw new Error(`Found more than one paths with functions: ${join(paths)}. Can you be more specific?`);
-  }
-
-  return paths[0];
+  return path;
 };
 
 module.exports = resolveMethodPath;

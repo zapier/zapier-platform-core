@@ -300,7 +300,7 @@ describe('create-app', () => {
 
   describe('hydration', () => {
     it('should hydrate method', (done) => {
-      const input = createTestInput('resources.honkerdonker.list.operation.perform');
+      const input = createTestInput(appDefinition.resources.honkerdonker.list.operation.perform);
 
       app(input).then(output => {
         output.results.should.eql([
