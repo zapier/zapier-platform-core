@@ -15,12 +15,13 @@ const isRequestMethod = needle => typeof needle === 'object' && typeof needle.ur
 const resolveMethodPath = (app, needle) => {
   // can be a function (directly callable), an array (like inputFields) or a path itself
   if (!(typeof needle === 'function' || _.isArray(needle) || isRequestMethod(needle))) {
-    throw new Error('You must pass in a function/array.');
+    throw new Error('You must pass in a function/array/object.');
   }
 
-  const path = dataTools.findMapDeep(app, needle);
+  // incurs roughly ~10ms penalty for _.isEqual fallback on a === miss on an averagish app
+  const path = dataTools.findMapDeep(app, needle) || dataTools.findMapDeep(app, needle, _.isEqual);
   if (!path) {
-    throw new Error('We could not find (via ===) your function/array anywhere on your App definition.');
+    throw new Error('We could not find your function/array/object anywhere on your App definition.');
   }
 
   return path;

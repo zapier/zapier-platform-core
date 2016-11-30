@@ -26,7 +26,7 @@ describe('hydration', () => {
         dehydrate('foo', inputData);
         '1'.should.eql('2'); // shouldn't pass
       } catch (err) {
-        err.message.should.containEql('You must pass in a function/array.');
+        err.message.should.containEql('You must pass in a function/array/object.');
       }
     });
 
@@ -36,7 +36,7 @@ describe('hydration', () => {
         dehydrate(funcToMiss, inputData);
         '1'.should.eql('2'); // shouldn't pass
       } catch (err) {
-        err.message.should.containEql('We could not find (via ===) your function/array anywhere on your App definition.');
+        err.message.should.containEql('We could not find your function/array/object anywhere on your App definition.');
       }
     });
 

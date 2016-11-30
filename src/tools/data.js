@@ -6,16 +6,20 @@ const isPlainObj = (o) => {
   return o && typeof o == 'object' && o.constructor === Object;
 };
 
+const comparison = (obj, needle) => obj === needle;
+
 // Returns a path for the deeply nested haystack where
-// you could find the needle. Is a bit hacky because we
-// throw an error to short circuit the deep search.
-const findMapDeep = (haystack, needle) => {
+// you could find the needle. If the needle is a plain
+// object we try _.isEqual (which could be slow!).
+const findMapDeep = (haystack, needle, comp) => {
+  comp = comp || comparison;
+
   const finder = (obj, path) => {
     let i;
 
     path = path || [];
 
-    if (obj === needle) {
+    if (comp(obj, needle)) {
       return path;
     } else if (Array.isArray(obj)) {
       for (i = obj.length - 1; i >= 0; i--) {
