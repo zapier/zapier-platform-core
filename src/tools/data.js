@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const memoize = require('./memoize');
 
 const isPlainObj = (o) => {
   return o && typeof o == 'object' && o.constructor === Object;
@@ -11,6 +12,7 @@ const comparison = (obj, needle) => obj === needle;
 // Returns a path for the deeply nested haystack where
 // you could find the needle. If the needle is a plain
 // object we try _.isEqual (which could be slow!).
+// TODO: might be nice to WeakMap memoize
 const findMapDeep = (haystack, needle, comp) => {
   comp = comp || comparison;
 
@@ -51,6 +53,8 @@ const findMapDeep = (haystack, needle, comp) => {
     return undefined;
   }
 };
+
+const memoizedFindMapDeep = memoize(findMapDeep);
 
 const deepCopy = (obj) => {
   return _.cloneDeepWith(obj, (value) => {
@@ -128,6 +132,7 @@ const flattenPaths = (data, sep) => {
 module.exports = {
   isPlainObj,
   findMapDeep,
+  memoizedFindMapDeep,
   deepCopy,
   jsonCopy,
   deepFreeze,

@@ -19,7 +19,7 @@ const resolveMethodPath = (app, needle) => {
   }
 
   // incurs roughly ~10ms penalty for _.isEqual fallback on a === miss on an averagish app
-  const path = dataTools.findMapDeep(app, needle) || dataTools.findMapDeep(app, needle, _.isEqual);
+  const path = dataTools.memoizedFindMapDeep(app, needle) || dataTools.memoizedFindMapDeep(app, needle, _.isEqual);
   if (!path) {
     throw new Error('We could not find your function/array/object anywhere on your App definition.');
   }
