@@ -15,7 +15,7 @@ const isRequestMethod = needle => typeof needle === 'object' && typeof needle.ur
 const resolveMethodPath = (app, needle) => {
   // temporary warning for all those with old code
   if (typeof needle === 'string') {
-    console.log('In version 0.9.10 we removed string path resolution. Read more here ');
+    console.log('In version 0.9.10 we removed string path resolution. Read more here https://github.com/zapier/zapier-platform-core/blob/master/CHANGELOG.md#0910');
   }
 
   if (!(typeof needle === 'function' || _.isArray(needle) || isRequestMethod(needle))) {
