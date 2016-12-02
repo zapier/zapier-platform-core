@@ -13,7 +13,11 @@ const isRequestMethod = needle => typeof needle === 'object' && typeof needle.ur
 
 */
 const resolveMethodPath = (app, needle) => {
-  // can be a function (directly callable), an array (like inputFields) or a path itself
+  // temporary warning for all those with old code
+  if (typeof needle === 'string') {
+    console.log('In version 0.9.10 we removed string path resolution. Read more here ');
+  }
+
   if (!(typeof needle === 'function' || _.isArray(needle) || isRequestMethod(needle))) {
     throw new Error('You must pass in a function/array/object.');
   }
