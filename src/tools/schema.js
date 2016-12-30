@@ -19,7 +19,7 @@ const convertResourceDos = (appRaw) => {
       trigger.operation.resource = resource.key;
       trigger.operation.type = 'hook';
       trigger.operation.outputFields = trigger.operation.outputFields || resource.outputFields;
-      if (resource.list && resource.list.operation && resource.list.perform) {
+      if (resource.list && resource.list.operation && resource.list.operation.perform) {
         trigger.operation.performList = trigger.operation.performList || resource.list.perform;
       }
       triggers[trigger.key] = trigger;
