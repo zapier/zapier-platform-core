@@ -40,6 +40,9 @@ const convertResourceDos = (appRaw) => {
       search.key = `${resource.key}Search`;
       search.noun = resource.noun;
       search.operation.resource = resource.key;
+      if (resource.get && resource.get.operation && resource.get.operation.perform) {
+        search.operation.performGet = search.operation.performGet || resource.get.operation.perform;
+      }
       search.operation.outputFields = search.operation.outputFields || resource.outputFields;
       searches[search.key] = search;
     }
@@ -49,6 +52,9 @@ const convertResourceDos = (appRaw) => {
       create.key = `${resource.key}Create`;
       create.noun = resource.noun;
       create.operation.resource = resource.key;
+      if (resource.get && resource.get.operation && resource.get.operation.perform) {
+        create.operation.performGet = create.operation.performGet || resource.get.operation.perform;
+      }
       create.operation.outputFields = create.operation.outputFields || resource.outputFields;
       creates[create.key] = create;
     }
