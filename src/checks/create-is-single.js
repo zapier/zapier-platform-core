@@ -18,10 +18,7 @@ const createIsSingle = {
       ];
     }
 
-    if (_.isObject(results)) {
-      return []; // assumes a single object is not nested {data: [{}, {}]}
-    }
-
+    // assumes a single object not array is legit
     return [];
   }
 };
