@@ -130,7 +130,6 @@ const prepareApp = (appRaw) => {
 module.exports = {
   compileApp,
   validateApp,
-  convertResourceDos,
   serializeApp,
   prepareApp
 };
