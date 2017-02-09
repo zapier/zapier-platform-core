@@ -13,7 +13,7 @@ const convertResourceDos = (appRaw) => {
 
   _.each(appRaw.resources, (resource) => {
     if (resource.hook && resource.hook.operation) {
-      let trigger = resource.hook;
+      let trigger = dataTools.deepCopy(resource.hook);
       trigger.key = `${resource.key}Hook`;
       trigger.noun = resource.noun;
       trigger.operation.resource = resource.key;
