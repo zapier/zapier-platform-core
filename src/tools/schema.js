@@ -5,7 +5,7 @@ const cleaner = require('./cleaner');
 const dataTools = require('./data');
 const zapierSchema = require('zapier-platform-schema');
 
-// Take a resource list/hook and turn it into triggers, etc.
+// Take a resource with methods like list/hook and turn it into triggers, etc.
 const convertResourceDos = (appRaw) => {
   appRaw = dataTools.deepCopy(appRaw);
 
@@ -65,9 +65,45 @@ const convertResourceDos = (appRaw) => {
   return dataTools.deepCopy({ triggers, searches, creates });
 };
 
+/* When a trigger/search/create (action) links to a resource, we walk up to
+ * the resource and copy missing properties from resource to the action.
+ */
+const copyPropertiesFromResource = (type, action, appRaw) => {
+  if (appRaw.resources && action.operation && appRaw.resources[action.operation.resource]) {
+    const copyableProperties = ['outputFields', 'sample'];
+    const resource = appRaw.resources[action.operation.resource];
+
+    if (type === 'trigger' && action.operation.type === 'hook') {
+      if (resource.list && resource.list.operation && resource.list.operation.perform) {
+        action.operation.performList = action.operation.performList || resource.list.operation.perform;
+      }
+    } else if (type === 'search' || type === 'create') {
+      if (resource.get && resource.get.operation && resource.get.operation.perform) {
+        action.operation.performGet = action.operation.performGet || resource.get.operation.perform;
+      }
+    }
+
+    _.extend(action.operation, _.pick(resource, copyableProperties));
+  }
+
+  return action;
+};
+
 const compileApp = (appRaw) => {
   appRaw = dataTools.deepCopy(appRaw);
   const extras = convertResourceDos(appRaw);
+
+  _.each(appRaw.triggers, (trigger) => {
+    appRaw.triggers[trigger.key] = copyPropertiesFromResource('trigger', trigger, appRaw);
+  });
+
+  _.each(appRaw.searches, (search) => {
+    appRaw.searches[search.key] = copyPropertiesFromResource('search', search, appRaw);
+  });
+
+  _.each(appRaw.creates, (create) => {
+    appRaw.creates[create.key] = copyPropertiesFromResource('create', create, appRaw);
+  });
 
   appRaw.triggers = _.extend({}, appRaw.triggers || {}, extras.triggers);
   appRaw.searches = _.extend({}, appRaw.searches || {}, extras.searches);
