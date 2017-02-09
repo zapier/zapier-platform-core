@@ -28,7 +28,7 @@ describe('schema', () => {
       });
     });
 
-    it('should populate outputFields if available', () => {
+    it('should populate generated triggers/searches/creates with properties from resource', () => {
       const dummyMethod = {
         operation: {
           perform: () => {return {};}
@@ -57,8 +57,11 @@ describe('schema', () => {
       };
       const compiledApp = schema.compileApp(appRaw);
       compiledApp.triggers.fooList.operation.outputFields.should.have.length(2);
+      compiledApp.triggers.fooList.operation.sample.should.have.keys('id', 'name');
       compiledApp.searches.fooSearch.operation.outputFields.should.have.length(2);
+      compiledApp.searches.fooSearch.operation.sample.should.have.keys('id', 'name');
       compiledApp.creates.fooCreate.operation.outputFields.should.have.length(2);
+      compiledApp.creates.fooCreate.operation.sample.should.have.keys('id', 'name');
     });
 
     it("should populate hook's performList from list method if available", () => {

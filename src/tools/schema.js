@@ -16,10 +16,6 @@ const convertResourceDos = (appRaw) => {
       trigger.noun = resource.noun;
       trigger.operation.resource = resource.key;
       trigger.operation.type = 'hook';
-      trigger.operation.outputFields = trigger.operation.outputFields || resource.outputFields;
-      if (resource.list && resource.list.operation && resource.list.operation.perform) {
-        trigger.operation.performList = trigger.operation.performList || resource.list.operation.perform;
-      }
       triggers[trigger.key] = trigger;
     }
 
@@ -29,7 +25,6 @@ const convertResourceDos = (appRaw) => {
       trigger.noun = resource.noun;
       trigger.operation.resource = resource.key;
       trigger.operation.type = 'polling';
-      trigger.operation.outputFields = trigger.operation.outputFields || resource.outputFields;
       triggers[trigger.key] = trigger;
     }
 
@@ -38,10 +33,6 @@ const convertResourceDos = (appRaw) => {
       search.key = `${resource.key}Search`;
       search.noun = resource.noun;
       search.operation.resource = resource.key;
-      if (resource.get && resource.get.operation && resource.get.operation.perform) {
-        search.operation.performGet = search.operation.performGet || resource.get.operation.perform;
-      }
-      search.operation.outputFields = search.operation.outputFields || resource.outputFields;
       searches[search.key] = search;
     }
 
@@ -50,10 +41,6 @@ const convertResourceDos = (appRaw) => {
       create.key = `${resource.key}Create`;
       create.noun = resource.noun;
       create.operation.resource = resource.key;
-      if (resource.get && resource.get.operation && resource.get.operation.perform) {
-        create.operation.performGet = create.operation.performGet || resource.get.operation.perform;
-      }
-      create.operation.outputFields = create.operation.outputFields || resource.outputFields;
       creates[create.key] = create;
     }
 
@@ -91,6 +78,10 @@ const compileApp = (appRaw) => {
   appRaw = dataTools.deepCopy(appRaw);
   const extras = convertResourceDos(appRaw);
 
+  appRaw.triggers = _.extend({}, appRaw.triggers || {}, extras.triggers);
+  appRaw.searches = _.extend({}, appRaw.searches || {}, extras.searches);
+  appRaw.creates = _.extend({}, appRaw.creates || {}, extras.creates);
+
   _.each(appRaw.triggers, (trigger) => {
     appRaw.triggers[trigger.key] = copyPropertiesFromResource('trigger', trigger, appRaw);
   });
@@ -103,9 +94,6 @@ const compileApp = (appRaw) => {
     appRaw.creates[create.key] = copyPropertiesFromResource('create', create, appRaw);
   });
 
-  appRaw.triggers = _.extend({}, appRaw.triggers || {}, extras.triggers);
-  appRaw.searches = _.extend({}, appRaw.searches || {}, extras.searches);
-  appRaw.creates = _.extend({}, appRaw.creates || {}, extras.creates);
   return appRaw;
 };
 
