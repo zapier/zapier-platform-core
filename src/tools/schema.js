@@ -7,8 +7,6 @@ const zapierSchema = require('zapier-platform-schema');
 
 // Take a resource with methods like list/hook and turn it into triggers, etc.
 const convertResourceDos = (appRaw) => {
-  appRaw = dataTools.deepCopy(appRaw);
-
   let triggers = {}, searches = {}, creates = {};
 
   _.each(appRaw.resources, (resource) => {
@@ -62,7 +60,7 @@ const convertResourceDos = (appRaw) => {
     // TODO: search or create?
   });
 
-  return dataTools.deepCopy({ triggers, searches, creates });
+  return { triggers, searches, creates };
 };
 
 /* When a trigger/search/create (action) links to a resource, we walk up to
