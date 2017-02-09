@@ -78,9 +78,9 @@ const compileApp = (appRaw) => {
   appRaw = dataTools.deepCopy(appRaw);
   const extras = convertResourceDos(appRaw);
 
-  appRaw.triggers = _.extend({}, appRaw.triggers || {}, extras.triggers);
-  appRaw.searches = _.extend({}, appRaw.searches || {}, extras.searches);
-  appRaw.creates = _.extend({}, appRaw.creates || {}, extras.creates);
+  appRaw.triggers = _.extend({}, extras.triggers, appRaw.triggers || {});
+  appRaw.searches = _.extend({}, extras.searches, appRaw.searches || {});
+  appRaw.creates = _.extend({}, extras.creates, appRaw.creates || {});
 
   _.each(appRaw.triggers, (trigger) => {
     appRaw.triggers[trigger.key] = copyPropertiesFromResource('trigger', trigger, appRaw);
