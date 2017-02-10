@@ -59,11 +59,11 @@ const copyPropertiesFromResource = (type, action, appRaw) => {
     const resource = appRaw.resources[action.operation.resource];
 
     if (type === 'trigger' && action.operation.type === 'hook') {
-      if (resource.list && resource.list.operation && resource.list.operation.perform) {
+      if (_.get(resource, 'list.operation.perform')) {
         action.operation.performList = action.operation.performList || resource.list.operation.perform;
       }
     } else if (type === 'search' || type === 'create') {
-      if (resource.get && resource.get.operation && resource.get.operation.perform) {
+      if (_.get(resource, 'get.operation.perform')) {
         action.operation.performGet = action.operation.performGet || resource.get.operation.perform;
       }
     }
