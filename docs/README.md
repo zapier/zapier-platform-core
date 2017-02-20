@@ -8,5 +8,4 @@
 
 - `npm install` for getting started
 - `npm test` for running tests
-- `npm run integration-test` for running integration tests
 - `npm run docs` for updating this README
