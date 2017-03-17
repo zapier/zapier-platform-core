@@ -4,7 +4,7 @@ const _ = require('lodash');
 
 const request = require('./request-client-internal');
 
-const FALLBACK_RPC = 'http://localhost:8000/platform/rpc/cli';
+const FALLBACK_RPC = process.env.ZAPIER_BASE_ENDPOINT + '/platform/rpc/cli';
 
 const createRpcClient = (event) => {
   return function(method) {
@@ -17,10 +17,6 @@ const createRpcClient = (event) => {
       method,
       params
     });
-
-    // if (event.rpc_base) {
-    //   throw new Error('No `event.rpc_base` provided - cannot call RPC');
-    // }
 
     const req = {
       method: 'POST',
