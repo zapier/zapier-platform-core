@@ -58,7 +58,7 @@ describe('request tools', () => {
     request.should.eql(expected);
 
     request = requestMerge(
-      {url: 'http://example.com', headers: {'api-key': 'abcd', 'Token': '123'}},
+      {url: 'http://example.com', headers: {'api-key': 'abcd', 'Token': '123', 'User-Agent': 'Zapier'}},
       {headers: {'api-key': 'efgh', 'tOken': '754'}}
     );
     expected = {
@@ -66,7 +66,7 @@ describe('request tools', () => {
       url: 'http://example.com',
       params: {},
       headers: {
-        'user-agent': 'Zapier',
+        'User-Agent': 'Zapier',
         'api-key': 'efgh',
         'tOken': '754'
       }
