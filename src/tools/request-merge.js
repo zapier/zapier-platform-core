@@ -4,27 +4,49 @@ const _ = require('lodash');
 
 const requestClean = require('./request-clean');
 
-// Remove any matching keys (case-insensitive) from object, in order
-const removeExistingSimilarKeys = (object, keys) => {
-  keys.reverse(); // Last added is first to keep.
+// Do a merge with case-insensitive keys, and drop empty header keys
+const caseInsensitiveMerge = (requestOne, requestTwo, requestThree) => {
+  // This creates copies/clones
+  requestOne = requestClean(requestOne);
+  requestTwo = requestClean(requestTwo);
+  requestThree = requestClean(requestThree);
 
-  const indexLimit = keys.length - 1;
-  let i = 0;
+  // This is a very quick & efficient merge for all of request's properties
+  const mergedRequest = _.merge.apply(_, [requestOne, requestTwo, requestThree]);
 
-  while (i <= indexLimit && keys[i]) {
-    const checkingKey = keys[i];
+  // Now to cleanup headers, we start on the last request (the one to keep) and work backwards to add the keys
+  // NOTE: This is done "manually" instead of a _.merge or Object.assign() because we need case-insensitivity
+  const mergedRequestHeaders = requestThree.headers || {};
+  const requestTwoHeaders = requestTwo.headers || {};
+  const requestOneHeaders = requestOne.headers || {};
 
-    const foundKeyIndex = _.findIndex(keys, (key) => key !== checkingKey && key.toLowerCase() === checkingKey.toLowerCase());
+  // Check, in order, which keys to add (if they're not duplicate)
+  [requestTwoHeaders, requestOneHeaders].forEach((requestHeaders) => {
+    const existingKeys = Object.keys(mergedRequestHeaders);
+    const requestKeys = Object.keys(requestHeaders);
 
-    if (foundKeyIndex !== -1) {
-      const foundKey = keys[foundKeyIndex];
-      delete object[foundKey];
-      keys.splice(foundKeyIndex, 1);
-      i = -1; // Don't want to miss a thing (cue music)
+    // We will loop through every header, and if we find no (case-insensitive) match, we'll add it to mergedRequest
+    requestKeys.forEach((checkingKey) => {
+      const foundKeyIndex = _.findIndex(existingKeys, (key) => key.toLowerCase() === checkingKey.toLowerCase());
+
+      // Only add if the key doesn't exist yet
+      if (foundKeyIndex === -1) {
+        mergedRequestHeaders[checkingKey] = requestHeaders[checkingKey];
+      }
+    });
+  });
+
+  // Remove any keys with DROP_DIRECTIVE, after all merging happened
+  Object.keys(mergedRequestHeaders).forEach((key) => {
+    if (mergedRequestHeaders[key] === requestClean.DROP_DIRECTIVE) {
+      delete mergedRequestHeaders[key];
     }
+  });
 
-    i += 1;
-  }
+  // Update the headers with the cleaned up version
+  mergedRequest.headers = mergedRequestHeaders;
+
+  return mergedRequest;
 };
 
 // Stack requests on top of each other - deeply merging them.
@@ -37,24 +59,7 @@ const requestMerge = (requestOne, requestTwo) => {
     }
   };
 
-  const requests = [baseRequest, requestOne, requestTwo];
-
-  const request = _.merge.apply(_, requests.map(requestClean));
-
-  requests.headers = requests.headers || {};
-  const keys = Object.keys(request.headers);
-
-  request.headers = keys.reduce((coll, key) => {
-    let val = request.headers[key];
-
-    if (val === requestClean.DROP_DIRECTIVE) {
-      delete coll[key];
-    }
-
-    return coll;
-  }, request.headers);
-
-  removeExistingSimilarKeys(request.headers, keys);
+  const request = caseInsensitiveMerge(baseRequest, requestOne, requestTwo);
 
   return request;
 };
