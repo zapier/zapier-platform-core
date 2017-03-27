@@ -12,9 +12,9 @@ const caseInsensitiveMerge = (requestOne, requestTwo, requestThree) => {
   requestThree = requestClean(requestThree);
 
   // This is a very quick & efficient merge for all of request's properties
-  const mergedRequest = _.merge.apply(_, [requestOne, requestTwo, requestThree]);
+  const mergedRequest = _.merge(requestOne, requestTwo, requestThree);
 
-  // Now to cleanup headers, we start on the last request (the one to keep) and work backwards to add the keys
+  // Now to cleanup headers, we start on the last request (the one with priority) and work backwards to add the keys that don't already exist
   // NOTE: This is done "manually" instead of a _.merge or Object.assign() because we need case-insensitivity
   const mergedRequestHeaders = requestThree.headers || {};
   const requestTwoHeaders = requestTwo.headers || {};
