@@ -4,7 +4,7 @@ const _ = require('lodash');
 
 const requestClean = require('./request-clean');
 
-// Do a merge with case-insensitive keys, and drop empty header keys
+// Do a merge with case-insensitive keys in the .header, and drop empty .header keys
 const caseInsensitiveMerge = (requestOne, requestTwo, requestThree) => {
   // This creates copies/clones
   requestOne = requestClean(requestOne);
@@ -20,30 +20,26 @@ const caseInsensitiveMerge = (requestOne, requestTwo, requestThree) => {
   const requestTwoHeaders = requestTwo.headers || {};
   const requestOneHeaders = requestOne.headers || {};
 
-  // Check, in order, which keys to add (if they're not duplicate)
   [requestTwoHeaders, requestOneHeaders].forEach((requestHeaders) => {
     const existingKeys = Object.keys(mergedRequestHeaders);
     const requestKeys = Object.keys(requestHeaders);
 
-    // We will loop through every header, and if we find no (case-insensitive) match, we'll add it to mergedRequest
     requestKeys.forEach((checkingKey) => {
       const foundKeyIndex = _.findIndex(existingKeys, (key) => key.toLowerCase() === checkingKey.toLowerCase());
 
-      // Only add if the key doesn't exist yet
       if (foundKeyIndex === -1) {
         mergedRequestHeaders[checkingKey] = requestHeaders[checkingKey];
       }
     });
   });
 
-  // Remove any keys with DROP_DIRECTIVE, after all merging happened
+  // Remove "to drop" keys after all merging happened (instead of dropping and then getting it re-added)
   Object.keys(mergedRequestHeaders).forEach((key) => {
     if (mergedRequestHeaders[key] === requestClean.DROP_DIRECTIVE) {
       delete mergedRequestHeaders[key];
     }
   });
 
-  // Update the headers with the cleaned up version
   mergedRequest.headers = mergedRequestHeaders;
 
   return mergedRequest;
