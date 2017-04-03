@@ -4,6 +4,7 @@ const _ = require('lodash');
 const cleaner = require('./cleaner');
 const dataTools = require('./data');
 const zapierSchema = require('zapier-platform-schema');
+const styleGuideChecker = require('./style-guide-checker');
 
 // Take a resource with methods like list/hook and turn it into triggers, etc.
 const convertResourceDos = (appRaw) => {
@@ -120,6 +121,14 @@ const serializeApp = (compiledApp) => {
 const validateApp = (compiledApp) => {
   const cleanedApp = cleaner.recurseCleanFuncs(compiledApp);
   const results = zapierSchema.validateAppDefinition(cleanedApp);
+
+  // Check for style guide only if there are no schema errors
+  if (results.errors.length === 0) {
+    // These aren't ValidationError so it won't "stop" validation, but it will show them in `zapier validate`
+    const styleGuideResults = styleGuideChecker.validateAppDefinition(cleanedApp);
+    return dataTools.jsonCopy(styleGuideResults.errors);
+  }
+
   return dataTools.jsonCopy(results.errors);
 };
 
