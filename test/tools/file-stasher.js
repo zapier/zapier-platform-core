@@ -111,8 +111,6 @@ describe('file upload', () => {
   });
 
   it('should fail if not being called from an hydrator event', (done) => {
-    mocky.mockRpcCall(mocky.fakeSignedPostData);
-
     const pollingStashFile = createFileStasher({
       _zapier: {
         rpc,
