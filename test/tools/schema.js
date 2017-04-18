@@ -95,7 +95,7 @@ describe('schema', () => {
         key: 'fooSearchOrCreate',
         display: {
           label: 'Find or Create Foo',
-          description: ''
+          description: 'Finds a Foo.'
         },
         search: 'fooSearch',
         create: 'fooCreate'
