@@ -51,7 +51,7 @@ const convertResourceDos = (appRaw) => {
         key: `${resource.key}SearchOrCreate`,
         display: {
           label: `Find or Create ${resource.noun}`,
-          description: search.display.description
+          description: (search.display && search.display.description) || ''
         },
         search: search.key,
         create: create.key
