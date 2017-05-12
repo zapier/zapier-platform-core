@@ -44,7 +44,7 @@ const createLocker = (input) => {
         if (result.available) {
           callback();
         } else {
-          // TODO: Do we through something else here for the runner to catch it?
+          // TODO: Do we throw something else here for the runner to catch it?
           throw new Error('NOT_A_REAL_ERROR_JUST_TRY_ME_AGAIN');
         }
       });
