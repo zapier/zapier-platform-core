@@ -6,5 +6,5 @@ module.exports = {
   triggerIsArray: require('./trigger-is-array'),
   triggerIsObject: require('./trigger-is-object'),
   triggerHasUniqueIds: require('./trigger-has-unique-ids'),
-  triggerHasId: require('./trigger-has-Id')
+  triggerHasId: require('./trigger-has-id')
 };
