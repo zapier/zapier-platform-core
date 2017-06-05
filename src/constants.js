@@ -14,6 +14,10 @@ const RENDER_ONLY_METHODS = ['authentication.oauth2Config.authorizeUrl'];
 
 const REQUEST_OBJECT_SHORTHAND_OPTIONS = {replace: true};
 
+// TODO: Match this with backend
+const LOCK_MAX_TIMEOUT = 60 * 60 * 24; // 1 day, in seconds
+const LOCK_EXCEPTION = 'LOCK_EXCEPTION';
+
 module.exports = {
   IS_TESTING,
   KILL_MIN_LIMIT,
@@ -21,5 +25,7 @@ module.exports = {
   RESPONSE_SIZE_LIMIT,
   HYDRATE_DIRECTIVE_HOIST,
   RENDER_ONLY_METHODS,
-  REQUEST_OBJECT_SHORTHAND_OPTIONS
+  REQUEST_OBJECT_SHORTHAND_OPTIONS,
+  LOCK_MAX_TIMEOUT,
+  LOCK_EXCEPTION
 };
