@@ -9,6 +9,7 @@ const errors = require('../../errors');
 const createDehydrator = require('../../tools/create-dehydrator');
 const createFileStasher = require('../../tools/create-file-stasher');
 const hashing = require('../../tools/hashing');
+const createLocker = require('../../tools/create-locker');
 
 /*
    Before middleware that injects z object.
@@ -22,6 +23,7 @@ const injectZObject = (input) => {
     hash: hashing.hashify,
     dehydrate: createDehydrator(input),
     stashFile: createFileStasher(input),
+    runWithLock: createLocker(input),
     errors
   };
 
