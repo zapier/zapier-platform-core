@@ -50,6 +50,7 @@ const createLocker = (input) => {
         if (result.available) {
           return true;
         } else {
+          // The Zapier back-end will catch this and re-call it
           return ZapierPromise.reject(new Error(constants.LOCK_EXCEPTION));
         }
       });
