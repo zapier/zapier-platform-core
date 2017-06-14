@@ -29,7 +29,7 @@
     "bluebird": "3.5.0",
     "content-disposition": "0.5.2",
     "dotenv": "4.0.0",
-    "form-data": "1.0.0",
+    "form-data": "2.2.0",
     "lodash": "4.17.4",
     "node-fetch": "1.7.1",
     "zapier-platform-schema": "1.0.11"
@@ -37,8 +37,8 @@
   "devDependencies": {
     "aws-sdk": "2.70.0",
     "babel": "6.23.0",
-    "babel-eslint": "6.1.2",
-    "eslint": "3.4.0",
+    "babel-eslint": "7.2.3",
+    "eslint": "4.0.0",
     "marked-toc": "0.3.0",
     "mocha": "3.4.2",
     "mock-fs": "4.4.1",
