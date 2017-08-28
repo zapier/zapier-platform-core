@@ -110,7 +110,7 @@ describe('file upload', () => {
       .catch(done);
   });
 
-  it('should fail if not being called from an hydrator event', (done) => {
+  it('should fail if being called from a trigger event', (done) => {
     const pollingStashFile = createFileStasher({
       _zapier: {
         rpc,
@@ -124,7 +124,7 @@ describe('file upload', () => {
     pollingStashFile(file)
       .then(() => done(new Error('this should have exploded')))
       .catch(err => {
-        should(err.message).containEql('Cannot stash files outside an hydration function/method');
+        should(err.message).containEql('Files can only be stashed within a create or hydration function/method');
         done();
       })
       .catch(done);
