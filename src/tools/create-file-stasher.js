@@ -78,7 +78,7 @@ const createFileStasher = (input) => {
     const isRunningOnHydratorOrCreate = () => {
       const whereAreWe = _.get(input, '_zapier.event.method', '');
       return whereAreWe.indexOf('hydrators.') === 0 || whereAreWe.indexOf('creates.') === 0;
-    }
+    };
     if (!isRunningOnHydratorOrCreate) {
       return ZapierPromise.reject(new Error('Files can only be stashed within a create or hydration function/method.'));
     }
