@@ -75,11 +75,10 @@ const createFileStasher = (input) => {
       return ZapierPromise.reject(new Error('rpc is not available'));
     }
 
-    const isRunningOnHydratorOrCreate = () => {
-      const whereAreWe = _.get(input, '_zapier.event.method', '');
-      return whereAreWe.indexOf('hydrators.') === 0 || whereAreWe.indexOf('creates.') === 0;
-    };
-    if (!isRunningOnHydratorOrCreate) {
+    const isRunningOnHydrator = _.get(input, '_zapier.event.method', '').indexOf('hydrators.') === 0;
+    const isRunningOnCreate = _.get(input, '_zapier.event.method', '').indexOf('creates.') === 0;
+
+    if (!isRunningOnHydrator && !isRunningOnCreate) {
       return ZapierPromise.reject(new Error('Files can only be stashed within a create or hydration function/method.'));
     }
 
