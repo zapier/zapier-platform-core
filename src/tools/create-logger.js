@@ -111,7 +111,7 @@ const sendLog = (options, event, message, data) => {
 
   if (options.logBuffer && data.log_type === 'console') {
     // Cap size of messages in log buffer, in case devs log humongous things.
-    options.logBuffer.push({type: data.log_type, message: truncate(body.message)});
+    options.logBuffer.push({type: data.log_type, message: body.message});
   }
 
   if (options.token) {
