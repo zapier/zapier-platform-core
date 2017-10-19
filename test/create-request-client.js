@@ -12,6 +12,22 @@ describe('request client', () => {
   const testLogger = () => Promise.resolve({});
   const input = createInput({}, {}, testLogger);
 
+  it('should include a user-agent header', (done) => {
+    const request = createAppRequestClient(input);
+    request({url: 'http://zapier-httpbin.herokuapp.com/get'})
+      .then(responseBefore => {
+        const response = JSON.parse(JSON.stringify(responseBefore));
+
+        response.request.headers['user-agent'].should.eql('Zapier');
+        response.status.should.eql(200);
+
+        const body = JSON.parse(response.content);
+        body.url.should.eql('http://zapier-httpbin.herokuapp.com/get');
+        done();
+      })
+      .catch(done);
+  });
+
   it('should have json serializable response', (done) => {
     const request = createAppRequestClient(input);
     request({url: 'http://zapier-httpbin.herokuapp.com/get'})
