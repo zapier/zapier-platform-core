@@ -1,18 +1,18 @@
 'use strict';
 
-const _ = require('lodash');
+import * as _ from 'lodash'
 
-const isSearch = require('./is-search');
+import isSearch from './is-search';
 
 /*
   Searches should always return an array of objects.
 */
-const searchIsArray = {
+export const searchIsArray: Check = {
   name: 'triggerIsArray',
   shouldRun: isSearch,
   run: (method, results) => {
     if (!_.isArray(results)) {
-      const repr = _.truncate(JSON.stringify(results), 50);
+      const repr = _.truncate(JSON.stringify(results), { length: 50 });
       return [
         `Results must be an array, got: ${typeof results}, (${repr})`
       ];
@@ -20,5 +20,3 @@ const searchIsArray = {
     return [];
   }
 };
-
-module.exports = searchIsArray;

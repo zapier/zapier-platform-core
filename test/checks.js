@@ -2,11 +2,11 @@
 
 require('should');
 
-const checks = require('../src/checks');
+const checks = require('../lib/checks');
 
-const isTrigger = require('../src/checks/is-trigger');
-const isSearch = require('../src/checks/is-search');
-const isCreate = require('../src/checks/is-create');
+const isTrigger = require('../lib/checks/is-trigger');
+const isSearch = require('../lib/checks/is-search');
+const isCreate = require('../lib/checks/is-create');
 
 const testMethod = 'some.method';
 
@@ -26,12 +26,12 @@ describe('checks', () => {
   });
 
   it('should check for ids via triggerHasId', () => {
-    checks.triggerHasId.run(testMethod, [{id: 1}]).length.should.eql(0);
-    checks.triggerHasId.run(testMethod, [{id: 1}, {id: 2}]).length.should.eql(0);
-    checks.triggerHasId.run(testMethod, [{game_id: 1}]).length.should.eql(1);
+    checks.triggerHasId.run(testMethod, [{ id: 1 }]).length.should.eql(0);
+    checks.triggerHasId.run(testMethod, [{ id: 1 }, { id: 2 }]).length.should.eql(0);
+    checks.triggerHasId.run(testMethod, [{ game_id: 1 }]).length.should.eql(1);
     checks.triggerHasId.run(testMethod, []).length.should.eql(0, 'blank array');
     checks.triggerHasId.run(testMethod, [1]).length.should.eql(1);
-    checks.triggerHasId.run(testMethod, [{id: null}]).length.should.eql(1);
+    checks.triggerHasId.run(testMethod, [{ id: null }]).length.should.eql(1);
     checks.triggerHasId.run(testMethod, [{}]).length.should.eql(1);
   });
 
@@ -56,16 +56,16 @@ describe('checks', () => {
   });
 
   it('should recognize types by name', () => {
-    isTrigger('triggers.blah.operation.perform').should.be.true();
-    isTrigger('resources.blah.list.operation.perform').should.be.true();
-    isTrigger('blah').should.be.false();
+    isTrigger.default('triggers.blah.operation.perform').should.be.true();
+    isTrigger.default('resources.blah.list.operation.perform').should.be.true();
+    isTrigger.default('blah').should.be.false();
 
-    isSearch('searches.blah.operation.perform').should.be.true();
-    isSearch('resources.blah.search.operation.perform').should.be.true();
-    isSearch('blah').should.be.false();
+    isSearch.default('searches.blah.operation.perform').should.be.true();
+    isSearch.default('resources.blah.search.operation.perform').should.be.true();
+    isSearch.default('blah').should.be.false();
 
-    isCreate('creates.blah.operation.perform').should.be.true();
-    isCreate('resources.blah.create.operation.perform').should.be.true();
-    isCreate('blah').should.be.false();
+    isCreate.default('creates.blah.operation.perform').should.be.true();
+    isCreate.default('resources.blah.create.operation.perform').should.be.true();
+    isCreate.default('blah').should.be.false();
   });
 });

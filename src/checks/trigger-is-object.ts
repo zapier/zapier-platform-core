@@ -1,13 +1,13 @@
 'use strict';
 
-const _ = require('lodash');
+import * as _ from 'lodash';
 
-const isTrigger = require('./is-trigger');
+import isTrigger from './is-trigger';
 
 /*
   Makes sure the results are all objects.
 */
-const triggerIsObject = {
+export const triggerIsObject: Check = {
   name: 'triggerIsObject',
   shouldRun: isTrigger,
   run: (method, results) => {
@@ -20,7 +20,7 @@ const triggerIsObject = {
     });
 
     if (nonObjectResult !== undefined) {
-      const repr = _.truncate(JSON.stringify(nonObjectResult), 50);
+      const repr = _.truncate(JSON.stringify(nonObjectResult), { length: 50 });
       return [
         `Got a result missing that was not an object (${repr})`
       ];
@@ -28,5 +28,3 @@ const triggerIsObject = {
     return [];
   }
 };
-
-module.exports = triggerIsObject;

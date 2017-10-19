@@ -1,17 +1,17 @@
 'use strict';
 
-const _ = require('lodash');
+import * as _ from 'lodash'
 
-const isTrigger = require('./is-trigger');
+import isTrigger from './is-trigger';
 
 /*
   Makes sure the results all have a unique ID in them.
 */
-const triggerHasUniqueIds = {
+export const triggerHasUniqueIds: Check = {
   name: 'triggerHasUniqueIds',
   shouldRun: isTrigger,
   run: (method, results) => {
-    const idCount = {};
+    const idCount: { [key: string]: number } = {};
     let doubleId;
     _.forEach(results, (result) => {
       const count = idCount[result.id] = (idCount[result.id] || 0) + 1;
@@ -31,5 +31,3 @@ const triggerHasUniqueIds = {
     return [];
   }
 };
-
-module.exports = triggerHasUniqueIds;

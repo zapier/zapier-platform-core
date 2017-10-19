@@ -1,18 +1,18 @@
 'use strict';
 
-const _ = require('lodash');
+import * as _ from 'lodash'
 
-const isCreate = require('./is-create');
+import isCreate from './is-create'
 
 /*
   Makes sure the results are all objects.
 */
-const createIsSingle = {
+export const createIsSingle: Check = {
   name: 'createIsSingle',
   shouldRun: isCreate,
   run: (method, results) => {
     if (_.isArray(results)) {
-      const repr = _.truncate(JSON.stringify(results), 50);
+      const repr = _.truncate(JSON.stringify(results), { length: 50 });
       return [
         `Got a result with multiple return values, expecting a single object from create (${repr})`
       ];
@@ -22,5 +22,3 @@ const createIsSingle = {
     return [];
   }
 };
-
-module.exports = createIsSingle;

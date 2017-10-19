@@ -1,18 +1,18 @@
 'use strict';
 
-const _ = require('lodash');
+import * as _ from 'lodash'
 
-const isTrigger = require('./is-trigger');
+import isTrigger from './is-trigger';
 
 /*
   Triggers should always return an array of objects.
 */
-const triggerIsArray = {
+export const triggerIsArray: Check = {
   name: 'triggerIsArray',
   shouldRun: isTrigger,
   run: (method, results) => {
     if (!_.isArray(results)) {
-      const repr = _.truncate(JSON.stringify(results), 50);
+      const repr = _.truncate(JSON.stringify(results), { length: 50 });
       return [
         `Results must be an array, got: ${typeof results}, (${repr})`
       ];
@@ -20,5 +20,3 @@ const triggerIsArray = {
     return [];
   }
 };
-
-module.exports = triggerIsArray;

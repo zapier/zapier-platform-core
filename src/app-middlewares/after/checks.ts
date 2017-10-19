@@ -1,17 +1,19 @@
 'use strict';
 
-const _ = require('lodash');
+import * as _ from 'lodash'
 
 const constants = require('../../constants');
 const errors = require('../../errors');
 
-const checks = _.values(require('../../checks'));
+import * as checksObj from '../../checks'
+const checks = _.values(checksObj)
+
 
 /*
   Take a look at our output results, run some checks on it, and depending on if we
   are running "locally or live" we will "raise or log" the errors, respectively.
 */
-const checkOutput = (output) => {
+const checkOutput = (output: any) => {
   const input = output.input || {};
   const _zapier = input._zapier || {};
   const event = _zapier.event || {};
@@ -29,7 +31,7 @@ const checkOutput = (output) => {
       })
       .map((check) => {
         return check.run(event.method, output.results)
-          .map(err => ({name: check.name, error: err}));
+          .map(err => ({ name: check.name, error: err }));
       });
     const checkResults = _.flatten(rawResults);
 

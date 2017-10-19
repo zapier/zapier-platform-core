@@ -6,10 +6,10 @@
    * validate returned inputFields to schema
    * etc...
 */
-const exampleChecker = {
+export const exampleChecker: Check = {
   name: 'exampleChecker',
   shouldRun: (method/*, bundle*/) => {
-    return method && true;
+    return method && true ? true : false;
   },
   run: (method, results) => {
     if (results) {
@@ -19,5 +19,3 @@ const exampleChecker = {
     return [];
   }
 };
-
-module.exports = exampleChecker;
