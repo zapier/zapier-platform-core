@@ -17,7 +17,6 @@ const sugarBody = (req) => {
   // move into the body as raw, set headers for coerce, merge to work
 
   req.headers = req.headers || {};
-  req.headers['user-agent'] = 'Zapier';
 
   if (!req.body && req.form) {
     req.body = req.form;

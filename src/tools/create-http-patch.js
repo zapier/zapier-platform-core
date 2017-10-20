@@ -9,6 +9,13 @@ const createHttpPatch = (event) => {
   const httpPatch = (object) => {
     const originalRequest = object.request;
 
+    // Avoids multiple patching and memory leaks (mostly when running tests locally)
+    if (object.patchedByZapier) {
+      return;
+    }
+
+    object.patchedByZapier = true;
+
     // Proxy the request method
     object.request = (options, callback) => {
       const requestUrl = options.url || options.href || (`${options.protocol || 'https://'}${options.host}${options.path}`);
