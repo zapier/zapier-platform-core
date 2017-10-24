@@ -55,8 +55,7 @@ const createHttpPatch = (event) => {
           logger(`${logData.response_status_code} ${logData.request_method} ${logData.request_url}`, logData);
         };
 
-        response.setEncoding('utf8');
-        response.on('data', (chunk) => responseBody.push(chunk));
+        response.on('data', (chunk) => responseBody.push(chunk.toString()));
         response.on('end', logResponse);
         response.on('error', logResponse);
 
