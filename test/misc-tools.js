@@ -72,6 +72,8 @@ describe('Tools', () => {
       {value: 'Something', length: 8, suffix: '...', expected: 'Somet...'},
       {value: 'Something', length: 9, suffix: '...', expected: 'Something'},
       {value: 'Something', length: 15, suffix: '...', expected: 'Something'},
+      {value: 'Somèt°˜ı¡•ﬁ⁄', length: 9, suffix: '...', expected: 'Somèt°...'},
+      {value: 'Somèt°˜ı¡•ﬁ⁄', length: 12, suffix: '...', expected: 'Somèt°˜ı¡•ﬁ⁄'},
     ];
 
     tests.forEach((test) => {

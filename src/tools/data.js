@@ -130,13 +130,17 @@ const flattenPaths = (data, sep) => {
 
 // A simpler, and memory-friendlier version of _.truncate()
 const simpleTruncate = (string, length, suffix) => {
-  if (!string || !string.toString || string.toString().length === 0) {
+  if (!string || !string.toString) {
     return '';
   }
 
-  if (string.toString().length > length) {
+  const finalString = string.toString();
+
+  if (finalString.length === 0) {
+    return '';
+  } else if (finalString.length > length) {
     const cutoff = (suffix ? length - suffix.length : length);
-    return string.toString().substr(0, cutoff) + (suffix ? suffix : '');
+    return finalString.substr(0, cutoff) + (suffix ? suffix : '');
   }
 
   return string;
