@@ -27,9 +27,7 @@ const createHttpPatch = event => {
       } else {
         requestUrl =
           options.href ||
-          `${(options.protocol || 'https:') + '//'}${options.host}${
-            options.path
-          }`;
+          `${options.protocol || 'https:'}//${options.host}${options.path}`;
       }
 
       const logger_url =
