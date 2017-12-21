@@ -46,7 +46,7 @@ describe('file upload', () => {
     mocky.mockRpcCall(mocky.fakeSignedPostData);
     mocky.mockUpload();
 
-    const file = new Buffer('hello world this is a buffer of text');
+    const file = new Buffer.from('hello world this is a buffer of text');
     stashFile(file)
       .then(url => {
         should(url).eql(
@@ -120,7 +120,7 @@ describe('file upload', () => {
     mocky.mockUpload();
 
     const file = Promise.resolve().then(
-      () => new Buffer('7468697320697320612074c3a97374', 'hex')
+      () => new Buffer.from('7468697320697320612074c3a97374', 'hex')
     );
 
     stashFile(file)
