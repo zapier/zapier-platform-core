@@ -61,7 +61,7 @@ const createHttpPatch = event => {
 
         const chunks = [];
 
-        const sendToLogger = (responseBody) => {
+        const sendToLogger = responseBody => {
           // Prepare data for GL
           const logData = {
             log_type: 'http',
@@ -86,14 +86,19 @@ const createHttpPatch = event => {
 
         const logResponse = () => {
           // Decode gzip if needed
-          if(_.get(responseHeaders, 'content-encoding', '') === 'gzip') {
+          if (response.headers['content-encoding'] === 'gzip') {
             const buffer = Buffer.concat(chunks);
             zlib.gunzip(buffer, (err, decoded) => {
-              const responseBody = err ? 'Could not decode response body.' : decoded.toString();
+              const responseBody = err
+                ? 'Could not decode response body.'
+                : decoded.toString();
+
               sendToLogger(responseBody);
             });
           } else {
-            const responseBody = _.map(chunks, chunk => chunk.toString()).join('\n');
+            const responseBody = _.map(chunks, chunk => chunk.toString()).join(
+              '\n'
+            );
             sendToLogger(responseBody);
           }
         };
