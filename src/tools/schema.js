@@ -115,6 +115,7 @@ const compileApp = appRaw => {
   });
 
   if (problemKeys.length) {
+    // TODO - DB: throw an error instead of logging
     console.log(
       '\nWARNING! The following key(s) conflict with those created by a resource:\n'
     );
@@ -122,7 +123,8 @@ const compileApp = appRaw => {
       problemKeys.map(k => `* ${k}`).join('\n'),
       `\n\nEdit the standalone object${
         problemKeys.length > 1 ? 's' : ''
-      } to resolve\n`
+      } to resolve`,
+      '!! In the next major version, this will throw an error\n'
     );
   }
 
