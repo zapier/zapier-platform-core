@@ -15,7 +15,7 @@ const createIsObject = {
     if (!_.isPlainObject(results)) {
       const repr = simpleTruncate(JSON.stringify(results), 50);
       return [
-        `Got a non-object result, expecting a single object from create (${repr})`
+        `Got a non-object result, expected an object from create (${repr})`
       ];
     }
 
