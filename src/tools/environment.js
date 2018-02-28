@@ -6,6 +6,8 @@ const dotenv = require('dotenv');
 
 const ensurePath = require('./ensure-path');
 
+const { IS_TESTING } = require('../constants');
+
 // Copy bundle environment into process.env, and vice versa,
 // for convenience and compatibility with native environment vars.
 const applyEnvironment = event => {
@@ -44,7 +46,7 @@ const injectEnvironmentFile = filename => {
   if (result.error) {
     // backwards compatibility
     result = dotenv.load({ path: localFilepath('.environment') });
-    if (result.parsed) {
+    if (result.parsed && !IS_TESTING) {
       console.log(
         [
           '\nWARNING: `.environment` files will no longer be read by default in the next major version.',

@@ -4,12 +4,12 @@ const mock = require('mock-fs');
 const tools = require('../../src/tools/exported');
 let env;
 
-describe.only('read env', () => {
+describe('read env', () => {
   beforeEach(() => {
     env = Object.assign({}, process.env);
   });
 
-  it('should should only read .env', done => {
+  it('should should only read .env', () => {
     mock({
       '.environment': 'CITY="boulder"\nNAME="david"\n',
       '.env': 'PIZZA="Blackjack"\n',
@@ -19,11 +19,10 @@ describe.only('read env', () => {
     tools.env.inject();
     process.env.PIZZA.should.equal('Blackjack');
     should.not.exist(process.env.CITY);
-    done();
   });
 
   // this is temporary in v6, removed for v7
-  it('should read .environment if .env is missing', done => {
+  it('should read .environment if .env is missing', () => {
     mock({
       '.environment': 'CITY="boulder"\nNAME="david"\n'
     });
@@ -31,10 +30,9 @@ describe.only('read env', () => {
     tools.env.inject();
     process.env.CITY.should.equal('boulder');
     should.not.exist(process.env.PIZZA);
-    done();
   });
 
-  it('should parse a with filename, ignore defaults', done => {
+  it('should parse a with filename, ignore defaults', () => {
     mock({
       '.environment': 'CITY="boulder"\nNAME="david"\n',
       '.env': 'PIZZA="Blackjack"\n',
@@ -45,7 +43,6 @@ describe.only('read env', () => {
     process.env.SECRET.should.equal('very_secret_thing');
     should.not.exist(process.env.CITY);
     should.not.exist(process.env.PIZZA);
-    done();
   });
 
   afterEach(() => {
