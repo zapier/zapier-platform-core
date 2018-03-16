@@ -361,7 +361,7 @@ describe('schema', () => {
       );
     });
 
-    it.only('should error when there is a collision', () => {
+    it('should error when there is a collision', () => {
       const appRaw = {
         resources: {
           foo: {
