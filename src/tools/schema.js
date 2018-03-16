@@ -118,7 +118,7 @@ const compileApp = appRaw => {
     const message = [
       'The following key(s) conflict with those created by a resource:\n',
       problemKeys.map(k => `* ${k}`).join('\n'),
-      '\n\nEdit the standalone object(s) to resolve'
+      '\n\nRename the key(s) in the standalone object(s) to resolve'
     ].join('');
 
     throw new Error(message);
