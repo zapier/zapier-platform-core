@@ -4,7 +4,7 @@ const should = require('should');
 
 const mocky = require('./mocky');
 
-describe('rpc client', () => {
+describe.only('rpc client', () => {
   const rpc = mocky.makeRpc();
 
   it('should handle a ping', done => {
@@ -25,6 +25,17 @@ describe('rpc client', () => {
       .then(() => done(new Error('this should have exploded')))
       .catch(err => {
         should(err.message).eql('this is an expected explosion');
+        done();
+      })
+      .catch(done);
+  });
+
+  it('should set a cursor key', done => {
+    mocky.mockRpcCall('blah');
+
+    rpc('store_cursor', 'blah')
+      .then(res => {
+        should(res).eql('blah');
         done();
       })
       .catch(done);

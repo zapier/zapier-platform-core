@@ -4,6 +4,7 @@ const _ = require('lodash');
 
 const createAppRequestClient = require('../../tools/create-app-request-client');
 const createJSONtool = require('../../tools/create-json-tool');
+const createStoreKeyTool = require('../../tools/create-storekey-tool');
 const createLoggerConsole = require('../../tools/create-logger-console');
 const errors = require('../../errors');
 const createDehydrator = require('../../tools/create-dehydrator');
@@ -15,13 +16,14 @@ const hashing = require('../../tools/hashing');
 */
 const injectZObject = input => {
   const bundle = _.get(input, '_zapier.event.bundle', {});
-
+  console.log('using new z');
   const zRoot = {
     console: createLoggerConsole(input),
     JSON: createJSONtool(),
     hash: hashing.hashify,
     dehydrate: createDehydrator(input),
     stashFile: createFileStasher(input),
+    cursor: createStoreKeyTool(input),
     errors
   };
 

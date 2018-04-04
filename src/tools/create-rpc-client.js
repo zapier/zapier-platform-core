@@ -15,6 +15,7 @@ const createRpcClient = event => {
     const id = parseInt(Math.random() * 100000000);
     const body = JSON.stringify({
       id: id,
+      storeKey: event.storeKey,
       method,
       params
     });
@@ -25,6 +26,8 @@ const createRpcClient = event => {
       body: body,
       headers: {}
     };
+
+    console.log('req is', req);
 
     if (event.token) {
       req.headers['X-Token'] = event.token;
