@@ -4,7 +4,7 @@ const should = require('should');
 
 const mocky = require('./mocky');
 
-describe.only('rpc client', () => {
+describe('rpc client', () => {
   const rpc = mocky.makeRpc();
 
   it('should handle a ping', done => {

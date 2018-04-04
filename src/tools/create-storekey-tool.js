@@ -13,8 +13,8 @@ const createStoreKeyTool = input => {
         return ZapierPromise.reject(new Error('rpc is not available'));
       }
 
-      return rpc('get_cursor').then(result => {
-        return JSON.parse(result).cursor;
+      return rpc('get_cursor').then(c => {
+        return c.result;
       });
     },
     set: cursor => {

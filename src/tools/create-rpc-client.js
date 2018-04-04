@@ -27,8 +27,6 @@ const createRpcClient = event => {
       headers: {}
     };
 
-    console.log('req is', req);
-
     if (event.token) {
       req.headers['X-Token'] = event.token;
     } else if (process.env.ZAPIER_DEPLOY_KEY) {

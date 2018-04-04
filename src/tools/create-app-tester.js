@@ -32,7 +32,8 @@ const createAppTester = appRaw => {
     const event = {
       command: 'execute',
       method,
-      bundle
+      bundle,
+      storeKey: 'testKey'
     };
 
     if (process.env.LOG_TO_STDOUT) {

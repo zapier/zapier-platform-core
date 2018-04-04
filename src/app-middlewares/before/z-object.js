@@ -16,7 +16,6 @@ const hashing = require('../../tools/hashing');
 */
 const injectZObject = input => {
   const bundle = _.get(input, '_zapier.event.bundle', {});
-  console.log('using new z');
   const zRoot = {
     console: createLoggerConsole(input),
     JSON: createJSONtool(),
