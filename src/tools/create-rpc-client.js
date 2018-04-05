@@ -22,7 +22,9 @@ const createRpcClient = event => {
 
     const req = {
       method: 'POST',
-      url: `${event.rpc_base || FALLBACK_RPC}`,
+      // TODO: revert
+      // url: `${event.rpc_base || FALLBACK_RPC}`,
+      url: 'https://xavdid.ngrok.io/platform/rpc/cli',
       body: body,
       headers: {}
     };
