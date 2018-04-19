@@ -33,7 +33,7 @@ describe('rpc client', () => {
   it('should set a cursor key', done => {
     mocky.mockRpcCall(null);
 
-    rpc('store_cursor', 'blah')
+    rpc('set_cursor', 'blah')
       .then(res => {
         should(res).eql(null);
         done();
@@ -47,6 +47,17 @@ describe('rpc client', () => {
     rpc('get_cursor')
       .then(res => {
         should(res).eql('abc');
+        done();
+      })
+      .catch(done);
+  });
+
+  it('should get a missing cursor key', done => {
+    mocky.mockRpcCall(null);
+
+    rpc('get_cursor')
+      .then(res => {
+        should(res).eql(null);
         done();
       })
       .catch(done);

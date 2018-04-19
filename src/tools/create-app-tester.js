@@ -3,21 +3,21 @@
 const createLambdaHandler = require('./create-lambda-handler');
 const resolveMethodPath = require('./resolve-method-path');
 const ZapierPromise = require('./promise');
-const { get, last } = require('lodash');
+const { get } = require('lodash');
 const { genId } = require('./data');
 
 // this is (annoyingly) mirrored in cli/api_base, so that test functions only
 // have a storeKey when canPaginate is true. otherwise, a test would work but a
 // poll on site would fail. this is only used in test handlers
+
 const shouldPaginate = (appRaw, method) => {
-  const methodParts = method.split('.');
-  if (methodParts[0] !== 'triggers' || last(methodParts) !== 'perform') {
-    return false;
+  if (method.startsWith('triggers') && method.endsWith('perform')) {
+    const methodParts = method.split('.');
+    methodParts.pop();
+    return get(appRaw, `${methodParts.join('.')}.canPaginate`);
   }
 
-  methodParts.pop();
-
-  return get(appRaw, `${methodParts.join('.')}.canPaginate`);
+  return false;
 };
 
 // Convert a app handler to promise for convenience.
