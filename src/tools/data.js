@@ -152,6 +152,8 @@ const simpleTruncate = (string, length, suffix) => {
   return string;
 };
 
+const genId = () => parseInt(Math.random() * 100000000);
+
 module.exports = {
   isPlainObj,
   findMapDeep,
@@ -161,5 +163,6 @@ module.exports = {
   deepFreeze,
   recurseReplace,
   flattenPaths,
-  simpleTruncate
+  simpleTruncate,
+  genId
 };

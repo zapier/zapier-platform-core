@@ -31,11 +31,22 @@ describe('rpc client', () => {
   });
 
   it('should set a cursor key', done => {
-    mocky.mockRpcCall('blah');
+    mocky.mockRpcCall(null);
 
     rpc('store_cursor', 'blah')
       .then(res => {
-        should(res).eql('blah');
+        should(res).eql(null);
+        done();
+      })
+      .catch(done);
+  });
+
+  it('should get a cursor key', done => {
+    mocky.mockRpcCall('abc');
+
+    rpc('get_cursor')
+      .then(res => {
+        should(res).eql('abc');
         done();
       })
       .catch(done);
