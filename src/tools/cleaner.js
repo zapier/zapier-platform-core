@@ -6,23 +6,25 @@ const isPlainObj = require('./data').isPlainObj;
 const recurseReplace = require('./data').recurseReplace;
 const flattenPaths = require('./data').flattenPaths;
 
-const recurseCleanFuncs = (obj, path) => {
+const recurseCleanFuncs = (obj, toString = false) => {
   // mainly turn functions into $func${arity}${arguments}$
-  path = path || [];
   if (typeof obj == 'function') {
+    if (toString) {
+      return obj.toString();
+    }
     const usesArguments =
       obj.toString().indexOf('arguments') !== -1 ? 't' : 'f';
     // TODO: could optimize $func$0$f$ as "pure" and just render them
     return `$func$${obj.length}$${usesArguments}$`;
   } else if (Array.isArray(obj)) {
     return obj.map((value, i) => {
-      return recurseCleanFuncs(value, path.concat([i]));
+      return recurseCleanFuncs(value, withCode);
     });
   } else if (isPlainObj(obj)) {
     const newObj = {};
     Object.keys(obj).forEach(key => {
       const value = obj[key];
-      newObj[key] = recurseCleanFuncs(value, path.concat([key]));
+      newObj[key] = recurseCleanFuncs(value, withCode);
     });
     return newObj;
   }
