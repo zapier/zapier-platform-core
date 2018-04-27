@@ -8,23 +8,23 @@ const zapierSchema = require('zapier-platform-schema');
 // method is {display: {}, operation: {}}
 // methodMap is {key: {display: {}, operation: {}}}
 const walkMethods = (resource, methodOrMethodMap) => {
-  const _default = [];
-  if (!methodOrMethodMap) {
-    return _default;
-  }
+  methodOrMethodMap = methodOrMethodMap || {};
+
   if (methodOrMethodMap.operation) {
     const method = dataTools.deepCopy(methodOrMethodMap);
     method.key = resource.key;
     return [method];
-  } else if (Object.keys(methodOrMethodMap).length) {
+  }
+
+  if (Object.keys(methodOrMethodMap).length) {
     return Object.keys(methodOrMethodMap).map(key => {
       const _method = dataTools.deepCopy(methodOrMethodMap[key]);
       _method.key = `${resource.key}_${key}`;
       return _method;
     });
-  } else {
-    return _default;
   }
+
+  return [];
 };
 
 // Take a resource with methods like list/hook and turn it into triggers, etc.
