@@ -5,6 +5,28 @@ const cleaner = require('./cleaner');
 const dataTools = require('./data');
 const zapierSchema = require('zapier-platform-schema');
 
+// method is {display: {}, operation: {}}
+// methodMap is {key: {display: {}, operation: {}}}
+const walkMethods = (resource, methodOrMethodMap) => {
+  const _default = [];
+  if (!methodOrMethodMap) {
+    return _default;
+  }
+  if (methodOrMethodMap.operation) {
+    const method = dataTools.deepCopy(methodOrMethodMap);
+    method.key = resource.key;
+    return [method];
+  } else if (Object.keys(methodOrMethodMap).length) {
+    return Object.keys(methodOrMethodMap).map(key => {
+      const _method = dataTools.deepCopy(methodOrMethodMap[key]);
+      _method.key = `${resource.key}_${key}`;
+      return _method;
+    });
+  } else {
+    return _default;
+  }
+};
+
 // Take a resource with methods like list/hook and turn it into triggers, etc.
 const convertResourceDos = appRaw => {
   let triggers = {},
@@ -13,43 +35,50 @@ const convertResourceDos = appRaw => {
     searchOrCreates = {};
 
   _.each(appRaw.resources, resource => {
-    let search, create, trigger;
-
-    if (resource.hook && resource.hook.operation) {
-      trigger = dataTools.deepCopy(resource.hook);
+    walkMethods(resource, resource.hook).forEach(trigger => {
       trigger.key = `${resource.key}Hook`;
       trigger.noun = resource.noun;
       trigger.operation.resource = resource.key;
       trigger.operation.type = 'hook';
       triggers[trigger.key] = trigger;
-    }
+    });
 
-    if (resource.list && resource.list.operation) {
-      trigger = dataTools.deepCopy(resource.list);
+    walkMethods(resource, resource.list).forEach(trigger => {
       trigger.key = `${resource.key}List`;
       trigger.noun = resource.noun;
       trigger.operation.resource = resource.key;
       trigger.operation.type = 'polling';
       triggers[trigger.key] = trigger;
-    }
+    });
 
-    if (resource.search && resource.search.operation) {
-      search = dataTools.deepCopy(resource.search);
+    walkMethods(resource, resource.search).forEach(search => {
       search.key = `${resource.key}Search`;
       search.noun = resource.noun;
       search.operation.resource = resource.key;
       searches[search.key] = search;
-    }
+    });
 
-    if (resource.create && resource.create.operation) {
-      create = dataTools.deepCopy(resource.create);
+    walkMethods(resource, resource.create).forEach(create => {
       create.key = `${resource.key}Create`;
       create.noun = resource.noun;
       create.operation.resource = resource.key;
       creates[create.key] = create;
-    }
+    });
 
-    if (search && create) {
+    walkMethods(resource, resource.misc).forEach(misc => {
+      misc.key = `${resource.key}Misc`;
+      misc.noun = resource.noun;
+      misc.operation.resource = resource.key;
+      creates[misc.key] = misc;
+    });
+
+    // TODO: ergh... this won't work with multiple searches/creates
+    if (
+      Object.keys(searches).length === 1 &&
+      Object.keys(creates).length === 1
+    ) {
+      let search = searches[Object.keys(searches)[0]];
+      let create = creates[Object.keys(creates)[0]];
       let searchOrCreate = {
         //key: `${resource.key}SearchOrCreate`,
         key: `${search.key}`, // For now this is a Zapier editor limitation (has to match search)
