@@ -186,6 +186,27 @@ describe('schema', () => {
       });
     });
 
+    it('should turn {source: <code>} into Function', () => {
+      const appRaw = {
+        resources: {
+          foo: {
+            key: 'foo',
+            noun: 'Foo',
+            list: {
+              display: {},
+              operation: {
+                perform: { source: 'return [{id: 45678}]' }
+              }
+            }
+          }
+        }
+      };
+      const compiledApp = schema.compileApp(appRaw);
+      compiledApp.triggers.fooList.operation
+        .perform()
+        .should.deepEqual([{ id: 45678 }]);
+    });
+
     it("should populate search's performGet from get method if available", () => {
       const appRaw = {
         resources: {

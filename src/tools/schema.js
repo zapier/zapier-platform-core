@@ -5,6 +5,21 @@ const cleaner = require('./cleaner');
 const dataTools = require('./data');
 const zapierSchema = require('zapier-platform-schema');
 
+const findSourceAndFunctionize = appRaw => {
+  const replacer = obj => {
+    if (
+      obj &&
+      typeof obj.source === 'string' &&
+      obj.source.indexOf('return') !== -1
+    ) {
+      obj = Function('z', 'bundle', 'callback', obj.source); // eslint-disable-line no-new-func
+    }
+    return obj;
+  };
+  appRaw = dataTools.recurseReplace(appRaw, replacer, { all: true });
+  return appRaw;
+};
+
 // Take a resource with methods like list/hook and turn it into triggers, etc.
 const convertResourceDos = appRaw => {
   let triggers = {},
@@ -99,6 +114,7 @@ const copyPropertiesFromResource = (type, action, appRaw) => {
 
 const compileApp = appRaw => {
   appRaw = dataTools.deepCopy(appRaw);
+  appRaw = findSourceAndFunctionize(appRaw);
   const extras = convertResourceDos(appRaw);
 
   const actions = ['triggers', 'searches', 'creates', 'searchOrCreates'];
