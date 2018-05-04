@@ -25,6 +25,12 @@ describe('schema-tools', () => {
       func().should.deepEqual([{ id: 1234 }]);
     });
 
+    it('should wrap non-function fails', () => {
+      const funcPath = path.resolve('test/moduleuserapp/index');
+      const func = schemaTools.requireOrLazyError(funcPath);
+      func.should.throw(/does not export a function/);
+    });
+
     it('should wrap require fails', () => {
       const func = schemaTools.requireOrLazyError('not/a/real/pathjs');
       func.should.throw(/Cannot find module/);
