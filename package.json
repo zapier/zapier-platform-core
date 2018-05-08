@@ -10,7 +10,7 @@
   "scripts": {
     "preversion": "git pull && npm test",
     "version": "node bin/bump-dependencies.js && git add package.json",
-    "postversion": "git push && git push --tags",
+    "postversion": "git push && git push --tags && npm run deploy-boilerplate",
     "test": "mocha -t 5000 --recursive test",
     "posttest": "npm run lint",
     "plain-test": "mocha -t 3000 --recursive test",
@@ -18,7 +18,10 @@
     "lint": "eslint src test",
     "build": "bin/build.sh local.bundle.zip",
     "upload": "bin/upload-lambda.js local.bundle.zip",
-    "deploy": "bin/build.sh local.bundle.zip && bin/upload-lambda.js local.bundle.zip",
+    "deploy": "npm run build && npm run upload",
+    "build-boilerplate": "bin/build-boilerplate.sh",
+    "upload-boilerplate": "bin/upload-boilerplate.js",
+    "deploy-boilerplate": "npm run build-boilerplate && npm run upload-boilerplate",
     "precommit": "lint-staged"
   },
   "engines": {
