@@ -3,18 +3,22 @@
 # Usage like so:
 # ./build-boilerplate.sh
 
-FILE='boilerplate.zip'
+CONTENTS_DIR='boilerplate'
+BUILD_DIR='build-boilerplate'
+FILE="$BUILD_DIR/boilerplate.zip"
 
 # This allows us to avoid duplicating files in git
 FILES_TO_COPY='zapierwrapper.js'
 
-if [ -f $FILE ]
+if [ -d $BUILD_DIR ]
 then
-   rm -f $FILE
+   rm -fr $BUILD_DIR
 fi
 
+mkdir -p $BUILD_DIR
+
 # Copy files
-cp include/$FILES_TO_COPY boilerplate/
+cp "include/$FILES_TO_COPY" "$CONTENTS_DIR/"
 
 # Get new version
 NEW_VERSION="$(node -p "require('./package.json').version")"
@@ -25,11 +29,11 @@ REPLACE_DEP_STRING='"zapier-platform-core": "'"$NEW_VERSION"'"'
 REPLACE_DEF_STRING='"platformVersion": "'"$NEW_VERSION"'"'
 
 # Update version
-sed -i '' -e "s/$FIND_DEP_STRING/$REPLACE_DEP_STRING/g" boilerplate/package.json
-sed -i '' -e "s/$FIND_DEF_STRING/$REPLACE_DEF_STRING/g" boilerplate/definition.json
+sed -i '' -e "s/$FIND_DEP_STRING/$REPLACE_DEP_STRING/g" "$CONTENTS_DIR/package.json"
+sed -i '' -e "s/$FIND_DEF_STRING/$REPLACE_DEF_STRING/g" "$CONTENTS_DIR/definition.json"
 
 # Install dependencies
-cd boilerplate && npm install
+cd $CONTENTS_DIR && npm install
 
 # Build the zip file!
 zip -R ../$FILE '*.js' '*.json'
@@ -41,5 +45,5 @@ rm -f $FILES_TO_COPY
 rm -fr node_modules && cd ..
 
 # Revert version
-sed -i '' -e "s/$REPLACE_DEP_STRING/$FIND_DEP_STRING/g" boilerplate/package.json
-sed -i '' -e "s/$REPLACE_DEF_STRING/$FIND_DEF_STRING/g" boilerplate/definition.json
+sed -i '' -e "s/$REPLACE_DEP_STRING/$FIND_DEP_STRING/g" "$CONTENTS_DIR/package.json"
+sed -i '' -e "s/$REPLACE_DEF_STRING/$FIND_DEF_STRING/g" "$CONTENTS_DIR/definition.json"
