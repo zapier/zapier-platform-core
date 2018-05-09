@@ -4,24 +4,59 @@
 
 /// <reference types="node" />
 
-import { Stream } from 'stream';
-import { Utf8AsciiLatin1Encoding, HexBase64Latin1Encoding } from 'crypto';
 import { Agent } from 'http';
 
 // The EXPORTED OBJECT
 export const version: string;
 export const tools: { env: { inject: (filename?: string) => void } };
-// export const createAppHandler: (appRaw: object) => any // internal
 export const createAppTester: (
   appRaw: object
 ) => (
   func: (z: zObject, bundle: Bundle) => any,
-  bundle?: Bundle
+  bundle?: Partial<Bundle> // partial so we don't have to make a full bundle in tests
 ) => Promise<any>;
-// internal only
-// export const integrationTestHandler: () => void;
 
-interface Bundle {}
+// internal only
+// export const integrationTestHandler: () => any;
+// export const createAppHandler: (appRaw: object) => any
+
+type HTTPMethod =
+  | 'GET'
+  | 'POST'
+  | 'PUT'
+  | 'PATCH'
+  | 'DELETE'
+  | 'OPTIONS'
+  | 'HEAD';
+
+export interface Bundle {
+  authData: { [x: string]: string };
+  inputData: { [x: string]: string };
+  inputDataRaw: { [x: string]: string };
+  meta: {
+    frontend: boolean;
+    prefill: boolean;
+    hydrate: boolean;
+    test_poll: boolean;
+    standard_poll: boolean;
+    first_poll: boolean;
+    limit: number;
+    page: number;
+    zap?: { id: string };
+  };
+  rawRequest?: Partial<{
+    method: HTTPMethod;
+    querystring: string;
+    headers: { [x: string]: string };
+    content: string;
+  }>;
+  cleanedRequest?: Partial<{
+    method: HTTPMethod;
+    querystring: { [x: string]: string };
+    headers: { [x: string]: string };
+    content: { [x: string]: string };
+  }>;
+}
 
 declare class HaltedError extends Error {}
 declare class ExpiredAuthError extends Error {}
@@ -30,10 +65,10 @@ declare class RefreshAuthError extends Error {}
 // copied http stuff from external typings
 export interface HttpRequestOptions {
   url?: string;
-  method?: 'POST' | 'GET' | 'OPTIONS' | 'HEAD' | 'DELETE' | 'PATCH' | 'PUT';
-  body?: string | Buffer | NodeJS.ReadableStream | object;
+  method?: HTTPMethod;
+  body?: string | Buffer | ReadableStream | object;
   headers?: { [name: string]: string };
-  json?: object | any[] | null;
+  json?: object | any[];
   params?: object;
   form?: object;
   raw?: boolean;
@@ -45,30 +80,58 @@ export interface HttpRequestOptions {
   size?: number;
 }
 
-export interface HttpResponse {
+interface BaseHTTPResponse {
   status: number;
-  content: string | Buffer;
-  json: object | undefined | Promise<object | undefined>;
-  body?: NodeJS.ReadableStream;
   headers: { [key: string]: string };
   getHeader(key: string): string | undefined;
   throwForStatus(): void;
   request: HttpRequestOptions;
 }
 
+export interface HTTPResponse extends BaseHTTPResponse {
+  content: string;
+  json?: object;
+}
+
+export interface RawHTTPResponse extends BaseHTTPResponse {
+  content: Buffer;
+  json: Promise<object | undefined>;
+  body: ReadableStream;
+}
+
 export interface zObject {
   request: {
-    (url: string, options?: HttpRequestOptions): Promise<HttpResponse>;
-    (options: HttpRequestOptions): Promise<HttpResponse>;
+    // most specific overloads go first
+    (url: string, options: HttpRequestOptions & { raw: true }): Promise<
+      RawHTTPResponse
+    >;
+    (options: HttpRequestOptions & { raw: true; url: string }): Promise<
+      RawHTTPResponse
+    >;
+
+    (url: string, options?: HttpRequestOptions): Promise<HTTPResponse>;
+    (options: HttpRequestOptions & { url: string }): Promise<HTTPResponse>;
   };
 
   console: Console;
 
-  dehyrate: (func: (z: this, bundle: Bundle) => any, inputData: object) => void;
+  dehyrate: (
+    func: (z: this, bundle: Bundle) => any,
+    inputData: object
+  ) => string;
 
+  // coming soon
+  // cursor: {
+  //   get: () => Promise<string>
+  //   set: (cursor: string) => Promise<void>
+  // }
+
+  /**
+   * turns a file or request into a file into a publicly accessible url
+   */
   stashFile: {
     (
-      input: string | Buffer | Stream,
+      input: string | Buffer | ReadableStream,
       knownLength?: number,
       filename?: string,
       contentType?: string
@@ -80,7 +143,7 @@ export interface zObject {
     /**
      * Acts a lot like regular `JSON.parse`, but throws a nice error for improper json input
      */
-    parse: (text: string) => string;
+    parse: (text: string) => any;
     stringify: typeof JSON.stringify;
   };
 
@@ -91,12 +154,12 @@ export interface zObject {
    * @param encoding defaults to 'hex'
    * @param input_encoding defaults to 'binary'
    */
-  hash(
+  hash: (
     algorithm: string,
     data: string,
     encoding?: string,
     input_encoding?: string
-  ): string;
+  ) => string;
 
   errors: {
     HaltedError: typeof HaltedError;
