@@ -15,15 +15,24 @@ const createRpcClient = require('./create-rpc-client');
 const createHttpPatch = require('./create-http-patch');
 
 // Sometimes tests want to pass in an app object defined directly in the test,
-// so allow for that.
-const loadApp = (event, appRawOrPath) => {
-  if (event && event.appRawOverride) {
-    return event.appRawOverride;
-  }
-  if (_.isString(appRawOrPath)) {
-    return require(appRawOrPath);
-  }
-  return appRawOrPath;
+// so allow for that, and an event.appRawOverride for "buildless" apps.
+const loadApp = (event, rpc, appRawOrPath) => {
+  return new ZapierPromise((resolve, reject) => {
+    if (event && event.appRawOverride) {
+      if (event.appRawOverride === true) {
+        // appRawOverride is too big, so we fetch it via RPC
+        return rpc('get_definition_override')
+          .then(appRawOverride => resolve(JSON.parse(appRawOverride)))
+          .catch(err => reject(err));
+      } else {
+        return resolve(event.appRawOverride);
+      }
+    }
+    if (_.isString(appRawOrPath)) {
+      return resolve(require(appRawOrPath));
+    }
+    return resolve(appRawOrPath);
+  });
 };
 
 const createLambdaHandler = appRawOrPath => {
@@ -86,12 +95,15 @@ const createLambdaHandler = appRawOrPath => {
       // Copy bundle environment into process.env *before* loading app code,
       // so that top level app code can get bundle environment vars via process.env.
       environmentTools.applyEnvironment(event);
-      const appRaw = loadApp(event, appRawOrPath);
-      const app = createApp(appRaw);
+
       const rpc = createRpcClient(event);
 
-      const input = createInput(appRaw, event, logger, logBuffer, rpc);
-      return app(input)
+      return loadApp(event, rpc, appRawOrPath)
+        .then(appRaw => {
+          const app = createApp(appRaw);
+          const input = createInput(appRaw, event, logger, logBuffer, rpc);
+          return app(input);
+        })
         .then(output => {
           callbackOnce(null, cleaner.maskOutput(output));
         })
