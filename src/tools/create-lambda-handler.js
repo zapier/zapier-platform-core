@@ -22,7 +22,7 @@ const loadApp = (event, rpc, appRawOrPath) => {
       if (event.appRawOverride === true) {
         // appRawOverride is too big, so we fetch it via RPC
         return rpc('get_definition_override')
-          .then(appRawOverride => resolve(JSON.parse(appRawOverride)))
+          .then(appRawOverride => resolve(appRawOverride))
           .catch(err => reject(err));
       } else {
         return resolve(event.appRawOverride);
