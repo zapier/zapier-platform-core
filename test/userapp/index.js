@@ -95,6 +95,24 @@ const ContactSource = {
   }
 };
 
+const ContactLegacy = {
+  key: 'contactlegacy',
+  noun: 'Contact Legacy',
+  list: {
+    display: {
+      label: 'New Contact With Legacy Scripting!',
+      description:
+        'Trigger on new contacts, but return a response via legacy scripting.'
+    },
+    operation: {
+      perform: {
+        source:
+          "return z.legacyScripting.run(bundle, 'trigger', 'contactlegacy');"
+      }
+    }
+  }
+};
+
 const LoggingFunc = {
   key: 'loggingfunc',
   noun: 'loggingfunc',
@@ -478,6 +496,7 @@ const App = {
     [Contact.key]: Contact,
     [ContactError.key]: ContactError,
     [ContactSource.key]: ContactSource,
+    [ContactLegacy.key]: ContactLegacy,
     [LoggingFunc.key]: LoggingFunc,
     [RequestFunc.key]: RequestFunc,
     [RequestSugar.key]: RequestSugar,
@@ -498,7 +517,9 @@ const App = {
   },
   hydrators: {
     getBigStuff: () => {}
-  }
+  },
+  legacyScriptingSource:
+    'var Zap = {contactlegacy_poll: function(bundle) { return [{id: 1234, name: "hello world!"}] }};'
 };
 
 module.exports = App;
