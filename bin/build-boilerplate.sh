@@ -39,6 +39,10 @@ cd $CONTENTS_DIR && npm install
 # Allow pushing "local changes" into the zip file
 if [ "$1" == "--debug" ]; then
   cp -R ../src/* node_modules/zapier-platform-core/src/
+  cp -R ../node_modules/zapier-platform-legacy-scripting-runner/* node_modules/zapier-platform-legacy-scripting-runner/
+  rm -rf node_modules/zapier-platform-core/node_modules
+  rm -rf node_modules/zapier-platform-legacy-scripting-runner/node_modules
+  rm -rf node_modules/zapier-platform-schema/node_modules
 fi
 
 # Build the zip file!
