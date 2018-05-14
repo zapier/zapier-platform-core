@@ -518,8 +518,18 @@ const App = {
   hydrators: {
     getBigStuff: () => {}
   },
-  legacyScriptingSource:
-    'var Zap = {contactlegacy_poll: function(bundle) { return [{id: 1234, name: "hello world!"}] }};'
+  legacyScriptingSource: `
+    var Zap = {
+      contactlegacy_poll: function(bundle) {
+        var response = z.request({
+          url: 'https://auth-json-server.zapier.ninja/users',
+          params: { api_key: 'secret' }
+        });
+        var contacts = z.JSON.parse(response.content);
+        contacts[0].name = 'Patched by Legacy Scripting!';
+        return contacts;
+      }
+   };`
 };
 
 module.exports = App;

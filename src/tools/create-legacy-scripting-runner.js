@@ -2,20 +2,27 @@
 
 const _ = require('lodash');
 
+// Does string replacement ala WB, using bundle and a potential result object
+const replaceVars = (templateString, bundle, result) => {
+  const options = {
+    interpolate: /{{([\s\S]+?)}}/g
+  };
+  const values = _.extend({}, bundle.authData, bundle.inputData, result);
+  return _.template(templateString, options)(values);
+};
+
 const createLegacyScriptingRunner = (z, app) => {
   const source = app.legacyScriptingSource;
   if (!source) {
     return null;
   }
 
+  // Only UI-built app will have this legacy-scripting-runner dependency, so we
+  // need to make it an optional dependency
   let legacyScriptingRunnerFactory = null;
   try {
     legacyScriptingRunnerFactory = require('zapier-platform-legacy-scripting-runner');
   } catch (e) {
-    // Do nothing
-  }
-
-  if (!legacyScriptingRunnerFactory) {
     return null;
   }
 
@@ -69,10 +76,19 @@ const createLegacyScriptingRunner = (z, app) => {
   // const authType = _.get(app, 'authenticatin.type', 'custom');
   const runner = legacyScriptingRunnerFactory(Zap);
 
-  const smartRunEvent = (bundle, typeOf, key) => {
+  // Simulates how backend run legacy scripting. This exposes a
+  // z.legacyScripting.run() method that we can run legacy scripting easily
+  // like z.legacyScripting.run(bundle, 'trigger', 'KEY') in CLI.
+  const runScripting = (bundle, typeOf, key) => {
     if (typeOf === 'trigger') {
       let promise = null;
       let funcs = [];
+
+      bundle._legacyUrl = _.get(
+        app,
+        `triggers.${key}.operation.legacyProps.url`
+      );
+      bundle._legacyUrl = replaceVars(bundle._legacyUrl, bundle);
 
       const fullMethod = Zap[`${key}_poll`];
       if (fullMethod) {
@@ -111,7 +127,7 @@ const createLegacyScriptingRunner = (z, app) => {
     return Promise.resolve();
   };
 
-  return { run: smartRunEvent };
+  return { run: runScripting };
 };
 
 module.exports = createLegacyScriptingRunner;

@@ -26,13 +26,17 @@ describe('create-app', () => {
   const createRawTestInput = event =>
     createInput(appDefinition, event, testLogger);
 
-  it.only('should run legacy scripting', done => {
+  it('should run legacy scripting', done => {
     const input = createTestInput(
       'resources.contactlegacy.list.operation.perform'
     );
     app(input)
       .then(output => {
-        output.results.should.eql([{ id: 1234, name: 'hello world!' }]);
+        output.results.length.should.greaterThan(1);
+
+        const firstContact = output.results[0];
+        should.equal(firstContact.name, 'Patched by Legacy Scripting!');
+
         done();
       })
       .catch(done);
