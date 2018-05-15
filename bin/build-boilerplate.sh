@@ -46,7 +46,9 @@ if [ "$1" == "--debug" ]; then
 fi
 
 # Build the zip file!
-zip -R ../$FILE '*.js' '*.json' '*.node'
+zip -R ../$FILE '*.js' '*.json'\
+    '*/darwin*node-6/*.node' '*/darwin*node-7/*.node' '*/darwin*node-8/*.node'\
+    '*/linux*node-6/*.node' '*/linux*node-7/*.node' '*/linux*node-8/*.node'
 
 # Revert copied files
 rm -f $FILES_TO_COPY
