@@ -26,7 +26,7 @@ describe('create-app', () => {
   const createRawTestInput = event =>
     createInput(appDefinition, event, testLogger);
 
-  it('should run legacy scripting', done => {
+  it.skip('should run legacy scripting', done => {
     const input = createTestInput(
       'resources.contactlegacy.list.operation.perform'
     );
