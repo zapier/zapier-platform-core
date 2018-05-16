@@ -8,6 +8,7 @@ import { Agent } from 'http';
 
 // The EXPORTED OBJECT
 export const version: string;
+export const Promise: PromiseLike<any>;
 export const tools: { env: { inject: (filename?: string) => void } };
 export const createAppTester: (
   appRaw: object
@@ -166,4 +167,234 @@ export interface zObject {
     ExpiredAuthError: typeof ExpiredAuthError;
     RefreshAuthError: typeof RefreshAuthError;
   };
+}
+
+export interface AuthorizeUrlBundle<InputData = {}> {
+  inputData: InputData;
+}
+
+export interface GetAccessTokenBundle<InputData = {}> {
+  inputData: InputData & {
+    code: string;
+  };
+}
+
+export interface RefreshAccessTokenBundle<InputData> {
+  inputData: InputData;
+  authData: { [x: string]: string };
+}
+
+export interface OAuth2Authentication<InputData = {}> {
+  type: 'oauth2';
+  connectionLabel: string;
+  oauth2Config: {
+    authorizeUrl:
+    | string
+    | ((
+      z: zObject,
+      bundle: AuthorizeUrlBundle<InputData>
+    ) => string | Promise<string>)
+    | HttpRequestOptions;
+    getAccessToken:
+    | ((
+      z: zObject,
+      bundle: GetAccessTokenBundle<InputData>
+    ) => AuthData | Promise<AuthData>)
+    | HttpRequestOptions;
+    refreshAccessToken?:
+    | ((
+      z: zObject,
+      bundle: RefreshAccessTokenBundle<InputData>
+    ) => AuthData | Promise<AuthData>)
+    | HttpRequestOptions;
+    autoRefresh: boolean;
+    scope?: string;
+  };
+  test: HttpRequest | Function;
+}
+
+export interface BasicDisplay {
+  label: string;
+  description: string;
+  directions?: string;
+  important?: boolean;
+  hidden?: boolean;
+}
+
+export type Headers = {
+  [key: string]: string
+};
+
+export type Params = {
+  [key: string]: string
+};
+
+export interface HttpRequest<Body = {}> {
+  method?: HttpMethod;
+  url?: string;
+  body?: Body;
+  params?: Params;
+  headers?: Headers;
+  auth: Array<string>;
+}
+
+export interface FunctionRequire {
+  require: string;
+}
+
+export interface FunctionSource {
+  source: string;
+}
+
+export type Perform<T = any> = (z: zObject, bundle: Bundle) => Promise<T> | T;
+
+export type Function<T = any> = FunctionRequire | FunctionSource | Perform<T>;
+
+export interface FieldChoiceWithLabel {
+  value: string;
+  sample: string;
+  label: string;
+}
+
+export interface Field {
+  key: string;
+  label?: string;
+  helpText?: string;
+  type?: 'string' | 'text' | 'integer' | 'number' | 'boolean' | 'datetime' | 'file' | 'password';
+  required?: boolean;
+  placeholder?: string;
+  default?: string;
+  dynamic?: string;
+  search?: string;
+  choices?: object | string[] | FieldChoiceWithLabel[];
+  list?: boolean;
+  children?: Fields;
+  dict?: boolean;
+  computed?: boolean;
+  altersDynamicFields?: boolean;
+  inputFormat?: string;
+}
+
+export type Fields = Array<Field>;
+export type DynamicField = () => Field;
+export type DynamicFields = Array<DynamicField | Field>;
+
+export interface BasicOperation {
+  resource?: string;
+  perform: HttpRequest | Function;
+  inputFields?: DynamicFields;
+  outputFields?: DynamicFields;
+  sample: object;
+}
+
+export interface BasicPollingOperation extends BasicOperation {
+  type: 'polling';
+  perform: HttpRequest | Function<any[]>;
+  canPaginate?: boolean;
+}
+
+export interface BasicHookOperation extends BasicOperation {
+  type: 'hook';
+  perform: HttpRequest | Function<any[]>;
+  performList?: HttpRequest | Function;
+  performSubscribe?: HttpRequest | Function;
+  performUnsubscribe?: HttpRequest | Function;
+}
+
+export interface BasicActionOperation extends BasicOperation {
+  performGet?: HttpRequest | Function;
+}
+
+export interface BasicCreateActionOperation extends BasicOperation {
+  performGet?: HttpRequest | Function;
+  shouldLock?: boolean;
+}
+
+export interface Trigger {
+  key: string;
+  noun: string;
+  display: BasicDisplay;
+  operation: BasicPollingOperation | BasicHookOperation;
+}
+
+export type Triggers = {
+  [key: string]: Trigger
+};
+
+export interface Search {
+  key: string;
+  noun: string;
+  display: BasicDisplay;
+  operation: BasicActionOperation;
+}
+
+export type Searches = {
+  [key: string]: Search
+};
+
+export interface Create {
+  key: string;
+  noun: string;
+  display: BasicDisplay;
+  operation: BasicCreateActionOperation;
+}
+
+export type Creates = {
+  [key: string]: Create
+};
+
+export interface ResourceMethodGet {
+  display: BasicDisplay;
+  operation: BasicOperation;
+}
+
+export interface ResourceMethodHook {
+  display: BasicDisplay;
+  operation: BasicHookOperation;
+}
+
+export interface ResourceMethodList {
+  display: BasicDisplay;
+  operation: BasicPollingOperation;
+}
+
+export interface ResourceMethodSearch {
+  display: BasicDisplay;
+  operation: BasicActionOperation;
+}
+
+export interface ResourceMethodCreate {
+  display: BasicDisplay;
+  operation: BasicActionOperation;
+}
+
+export interface Resource {
+  key: string;
+  noun: string;
+  get?: ResourceMethodGet;
+  hook?: ResourceMethodHook;
+  list?: ResourceMethodList;
+  search?: ResourceMethodSearch;
+  create?: ResourceMethodCreate;
+  outputFields?: DynamicFields;
+  sample?: object;
+}
+
+export type Resources = {
+  [type: string]: Resource
+};
+
+export type BeforeRequestHandler = (request: HttpRequest, z: zObject, bundle: Bundle) => HttpRequest;
+export type AfterResponseHandler = (response: HttpResponse, z: zObject) => HttpResponse;
+
+export interface App {
+  version: string;
+  platformVersion: string;
+  authentication: OAuth2Authentication;
+  beforeRequest: Array<BeforeRequestHandler>;
+  afterResponse: Array<AfterResponseHandler>;
+  resources: Resources;
+  triggers: Triggers;
+  searches: Searches;
+  creates: Creates;
 }
