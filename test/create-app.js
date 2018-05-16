@@ -26,23 +26,6 @@ describe('create-app', () => {
   const createRawTestInput = event =>
     createInput(appDefinition, event, testLogger);
 
-  // Remove .skip once we release new legacy-scripting-runner
-  it.skip('should run legacy scripting', done => {
-    const input = createTestInput(
-      'resources.contactlegacy.list.operation.perform'
-    );
-    app(input)
-      .then(output => {
-        output.results.length.should.greaterThan(1);
-
-        const firstContact = output.results[0];
-        should.equal(firstContact.name, 'Patched by Legacy Scripting!');
-
-        done();
-      })
-      .catch(done);
-  });
-
   it('should return data from promise', done => {
     const input = createTestInput(
       'resources.workingfuncpromise.list.operation.perform'
