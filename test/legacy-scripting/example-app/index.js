@@ -1,5 +1,26 @@
 const legacyScriptingSource = `
     var Zap = {
+      get_session_info: function(bundle) {
+        var encodedCredentials = btoa(bundle.auth_fields.username + ':' + bundle.auth_fields.password);
+        var response = z.request({
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Basic ' + encodedCredentials
+          },
+          url: 'https://auth-json-server.zapier.ninja/me'
+        });
+
+        if (response.status_code !== 200) {
+          throw new HaltedException('Auth failed: ' + response.content);
+        }
+
+        // Endpoint /me doesn't really give us an API key. We're just
+        // simulating username/password login in exchange of an API key here.
+        return { api_key: 'secret' };
+      },
+
       contact_full_poll: function(bundle) {
         var response = z.request({
           url: 'https://auth-json-server.zapier.ninja/users',
@@ -73,7 +94,7 @@ const ContactTrigger_post = {
     label: 'New Contact with Post Scripting'
   },
   operation: {
-    legacyProps: {
+    legacyProperties: {
       url: 'https://auth-json-server.zapier.ninja/users?api_key=secret'
     },
     perform: {
