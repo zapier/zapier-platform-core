@@ -1,6 +1,7 @@
 'use strict';
 
 const mocky = require('./mocky');
+const should = require('should');
 
 describe('rpc client', () => {
   const rpc = mocky.makeRpc();
