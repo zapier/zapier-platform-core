@@ -3,12 +3,13 @@
 const _ = require('lodash');
 
 const createAppRequestClient = require('../../tools/create-app-request-client');
-const createJSONtool = require('../../tools/create-json-tool');
-const createStoreKeyTool = require('../../tools/create-storekey-tool');
-const createLoggerConsole = require('../../tools/create-logger-console');
-const errors = require('../../errors');
 const createDehydrator = require('../../tools/create-dehydrator');
 const createFileStasher = require('../../tools/create-file-stasher');
+const createJSONtool = require('../../tools/create-json-tool');
+const createStoreKeyTool = require('../../tools/create-storekey-tool');
+const createLegacyScriptingRunner = require('../../tools/create-legacy-scripting-runner');
+const createLoggerConsole = require('../../tools/create-logger-console');
+const errors = require('../../errors');
 const hashing = require('../../tools/hashing');
 
 /*
@@ -31,6 +32,12 @@ const injectZObject = input => {
   const z = _.extend({}, zSkinny, {
     request: createAppRequestClient(input, { extraArgs: [zSkinny, bundle] })
   });
+
+  const app = _.get(input, '_zapier.app');
+  const runner = createLegacyScriptingRunner(z, app);
+  if (runner) {
+    z.legacyScripting = runner;
+  }
 
   return _.extend({}, input, { z });
 };

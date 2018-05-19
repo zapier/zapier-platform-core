@@ -78,6 +78,23 @@ const ContactError = {
   }
 };
 
+const ContactSource = {
+  key: 'contactsource',
+  noun: 'Contact Source',
+  list: {
+    display: {
+      label: 'New Contact With Source!',
+      description:
+        'Trigger on new contacts, but return a response via fake JS source.'
+    },
+    operation: {
+      perform: {
+        source: 'return [{ id: 1234 }];'
+      }
+    }
+  }
+};
+
 const LoggingFunc = {
   key: 'loggingfunc',
   noun: 'loggingfunc',
@@ -302,16 +319,12 @@ const DynamicAsyncInputFields = {
       description: 'input fields are a promise'
     },
     operation: {
-      inputFields: Promise.resolve([
-        { key: 'key 1' },
-        { key: 'key 2' },
-        { key: 'key 3' }
-      ]),
-      outputFields: Promise.resolve([
-        { key: 'key 1' },
-        { key: 'key 2' },
-        { key: 'key 3' }
-      ]),
+      inputFields: [
+        Promise.resolve([{ key: 'key 1' }, { key: 'key 2' }, { key: 'key 3' }])
+      ],
+      outputFields: [
+        Promise.resolve([{ key: 'key 1' }, { key: 'key 2' }, { key: 'key 3' }])
+      ],
       perform: () => {}
     }
   }
@@ -460,6 +473,7 @@ const App = {
     [List.key]: List,
     [Contact.key]: Contact,
     [ContactError.key]: ContactError,
+    [ContactSource.key]: ContactSource,
     [LoggingFunc.key]: LoggingFunc,
     [RequestFunc.key]: RequestFunc,
     [RequestSugar.key]: RequestSugar,

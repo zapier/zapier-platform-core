@@ -90,22 +90,41 @@ const deepFreeze = obj => {
 };
 
 // Recurse a nested object replace stuff according to the function.
-const recurseReplace = (obj, replacer) => {
+const recurseReplace = (obj, replacer, options = {}) => {
+  if (options.all) {
+    obj = replacer(obj);
+  }
   if (Array.isArray(obj)) {
     return obj.map(value => {
-      return recurseReplace(value, replacer);
+      return recurseReplace(value, replacer, options);
     });
   } else if (isPlainObj(obj)) {
     const newObj = {};
     Object.keys(obj).map(key => {
       const value = obj[key];
-      newObj[key] = recurseReplace(value, replacer);
+      newObj[key] = recurseReplace(value, replacer, options);
     });
     return newObj;
   } else {
     obj = replacer(obj);
   }
   return obj;
+};
+
+// Recursively extract values from a nested object based on the matcher function.
+const recurseExtract = (obj, matcher) => {
+  const values = [];
+  Object.keys(obj).map(key => {
+    const value = obj[key];
+    if (matcher(key, value)) {
+      values.push(value);
+    } else if (isPlainObj(value)) {
+      recurseExtract(value, matcher).map(v => {
+        values.push(v);
+      });
+    }
+  });
+  return values;
 };
 
 const _IGNORE = {};
@@ -162,6 +181,7 @@ module.exports = {
   jsonCopy,
   deepFreeze,
   recurseReplace,
+  recurseExtract,
   flattenPaths,
   simpleTruncate,
   genId

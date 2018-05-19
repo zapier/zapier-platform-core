@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const cleaner = require('./cleaner');
 const dataTools = require('./data');
+const schemaTools = require('./schema-tools');
 const zapierSchema = require('zapier-platform-schema');
 
 // Take a resource with methods like list/hook and turn it into triggers, etc.
@@ -99,6 +100,7 @@ const copyPropertiesFromResource = (type, action, appRaw) => {
 
 const compileApp = appRaw => {
   appRaw = dataTools.deepCopy(appRaw);
+  appRaw = schemaTools.findSourceRequireFunctions(appRaw);
   const extras = convertResourceDos(appRaw);
 
   const actions = ['triggers', 'searches', 'creates', 'searchOrCreates'];
@@ -115,17 +117,13 @@ const compileApp = appRaw => {
   });
 
   if (problemKeys.length) {
-    // TODO - DB: throw an error instead of logging
-    console.log(
-      '\nWARNING! The following key(s) conflict with those created by a resource:\n'
-    );
-    console.log(
+    const message = [
+      'The following key(s) conflict with those created by a resource:\n',
       problemKeys.map(k => `* ${k}`).join('\n'),
-      `\n\nEdit the standalone object${
-        problemKeys.length > 1 ? 's' : ''
-      } to resolve`,
-      '!! In the next major version, this will throw an error\n'
-    );
+      '\n\nRename the key(s) in the standalone object(s) to resolve'
+    ].join('');
+
+    throw new Error(message);
   }
 
   appRaw.triggers = _.extend({}, extras.triggers, appRaw.triggers || {});
