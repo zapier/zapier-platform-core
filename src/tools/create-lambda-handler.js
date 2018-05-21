@@ -137,8 +137,8 @@ const createLambdaHandler = appRawOrPath => {
         .then(appRaw => {
           const app = createApp(appRaw);
 
-          // TODO: Avoid repeated prepareApp(appRaw), createApp() already
-          // calls prepareApp() but doesn't return it.
+          // TODO: Avoid calling prepareApp(appRaw) repeatedly here as createApp()
+          // already calls prepareApp() but just doesn't return it.
           const compiledApp = schemaTools.prepareApp(appRaw);
 
           const input = createInput(compiledApp, event, logger, logBuffer, rpc);
