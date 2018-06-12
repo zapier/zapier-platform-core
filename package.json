@@ -26,8 +26,8 @@
     "precommit": "lint-staged"
   },
   "engines": {
-    "node": ">=6.10.2",
-    "npm": ">=3.10.0"
+    "node": ">=8.10.0",
+    "npm": ">=5.6.0"
   },
   "engineStrict": true,
   "dependencies": {
@@ -36,8 +36,8 @@
     "dotenv": "5.0.1",
     "form-data": "2.2.0",
     "lodash": "4.17.10",
-    "node-fetch": "1.7.1",
-    "zapier-platform-schema": "6.1.0"
+    "node-fetch": "2.1.2",
+    "zapier-platform-schema": "7.0.0"
   },
   "devDependencies": {
     "async": "2.6.0",
