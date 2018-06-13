@@ -9,8 +9,8 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "files": [
-      "include/*.js",
-      "src/**/*.js"
+      "/include/*.js",
+      "/src/**/*.js"
   ],
   "scripts": {
     "preversion": "git pull && npm test",
