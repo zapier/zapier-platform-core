@@ -3,17 +3,15 @@
   "version": "1.0.0",
   "description": "A boilerplate that allows running a buildless app.",
   "homepage": "https://zapier.com/",
-  "author": "Zapier <partners@zapier.com>",
+  "author": "Zapier Engineering <engineering@zapier.com>",
   "license": "UNLICENSED",
   "main": "index.js",
   "engines": {
-    "node": "6.10.3",
-    "npm": ">=3.10.10"
+    "node": ">=8.10.0",
+    "npm": ">=5.6.0"
   },
   "dependencies": {
-    "async": "2.6.0",
-    "moment-timezone": "0.5.16",
     "zapier-platform-core": "CORE_PLATFORM_VERSION",
-    "zapier-platform-legacy-scripting-runner": "1.2.0"
+    "zapier-platform-legacy-scripting-runner": "2.0.0"
   }
 }
