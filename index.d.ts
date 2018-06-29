@@ -14,7 +14,7 @@ export const tools: { env: { inject: (filename?: string) => void } };
 export const createAppTester: (
   appRaw: object
 ) => <T extends any>(
-  func: (z: zObject, bundle: Bundle) => Promise<T>,
+  func: (z: ZObject, bundle: Bundle) => Promise<T>,
   bundle?: Partial<Bundle> // partial so we don't have to make a full bundle in tests
 ) => T extends Promise<T> ? T : Promise<T>;
 
@@ -101,7 +101,7 @@ export interface RawHttpResponse extends BaseHttpResponse {
   body: ReadableStream;
 }
 
-export interface zObject {
+export interface ZObject {
   request: {
     // most specific overloads go first
     (url: string, options: HttpRequestOptions & { raw: true }): Promise<
