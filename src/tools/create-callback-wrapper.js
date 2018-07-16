@@ -7,7 +7,7 @@ const createCallbackWrapper = input => {
   let callbackWrapper = {};
   Object.defineProperty(callbackWrapper, 'url', {
     get: function() {
-      _.set(true, '_zapier.callback.isUsed');
+      _.set(input, '_zapier.callback.isUsed', true);
       return callbackUrl;
     }
   });
