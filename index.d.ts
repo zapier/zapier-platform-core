@@ -14,9 +14,9 @@ export const tools: { env: { inject: (filename?: string) => void } };
 export const createAppTester: (
   appRaw: object
 ) => <T extends any>(
-  func: (z: zObject, bundle: Bundle) => Promise<T>,
-  bundle?: Partial<Bundle> // partial so we don't have to make a full bundle in tests
-) => T extends Promise<T> ? T : Promise<T>;
+    func: (z: zObject, bundle: Bundle) => Promise<T>,
+    bundle?: Partial<Bundle> // partial so we don't have to make a full bundle in tests
+  ) => T extends Promise<T> ? T : Promise<T>;
 
 // internal only
 // export const integrationTestHandler: () => any;
@@ -60,9 +60,9 @@ export interface Bundle<InputData = { [x: string]: any }> {
   }>;
 }
 
-declare class HaltedError extends Error {}
-declare class ExpiredAuthError extends Error {}
-declare class RefreshAuthError extends Error {}
+declare class HaltedError extends Error { }
+declare class ExpiredAuthError extends Error { }
+declare class RefreshAuthError extends Error { }
 
 // copied http stuff from external typings
 export interface HttpRequestOptions {
@@ -106,10 +106,10 @@ export interface zObject {
     // most specific overloads go first
     (url: string, options: HttpRequestOptions & { raw: true }): Promise<
       RawHttpResponse
-    >;
+      >;
     (options: HttpRequestOptions & { raw: true; url: string }): Promise<
       RawHttpResponse
-    >;
+      >;
 
     (url: string, options?: HttpRequestOptions): Promise<HttpResponse>;
     (options: HttpRequestOptions & { url: string }): Promise<HttpResponse>;
@@ -126,6 +126,11 @@ export interface zObject {
     get: () => Promise<string>;
     set: (cursor: string) => Promise<null>;
   };
+  callback: {
+    url: {
+      get: string
+    }
+  }
 
   /**
    * turns a file or request into a file into a publicly accessible url
