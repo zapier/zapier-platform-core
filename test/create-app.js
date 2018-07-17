@@ -484,4 +484,13 @@ describe('create-app', () => {
         .catch(done);
     });
   });
+  describe.only('calling a callback method', () => {
+    let results;
+    before(() => app(createTestInput(
+      'resources.executeCallbackRequest.list.operation.perform'
+    )).then(output => { results = output }));
+
+    it('returns a CALLBACK envelope', () => results.CALLBACK.should.eql(true));
+    it('returns the methods values', () => results.results.should.eql({}));
+  });
 });

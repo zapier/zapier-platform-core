@@ -6,10 +6,13 @@ const _ = require('lodash');
 */
 let callbackStatusCatcher = output => {
   const input = output.input || {};
-  const callbackUsed = _.get(input, '_zapier.callback.isUsed');
+
+  console.warn(`here ${_.get(input, '_zapier.event.callbackUrl.isUsed')}`);
+
+  const callbackUsed = _.get(input, '_zapier.event.callbackUrl.isUsed');
   if (callbackUsed) {
     output = ensureOutputEnvelope(output);
-    output.CALLBACK = true;
+    output.status = 'CALLBACK';
   }
   return output;
 };
