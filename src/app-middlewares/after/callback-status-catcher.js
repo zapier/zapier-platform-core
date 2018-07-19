@@ -1,5 +1,6 @@
 'use strict';
 let ensureOutputEnvelope = require('../../tools/envelope').ensureOutputEnvelope;
+let STATUSES = require('../../constants');
 const _ = require('lodash');
 /*
 
@@ -12,7 +13,7 @@ let callbackStatusCatcher = output => {
   const callbackUsed = _.get(input, '_zapier.event.callbackUrl.isUsed');
   if (callbackUsed) {
     output = ensureOutputEnvelope(output);
-    output.status = 'CALLBACK';
+    output.status = STATUSES.CALLBACK;
   }
   return output;
 };

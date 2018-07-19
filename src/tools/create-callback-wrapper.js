@@ -2,21 +2,19 @@
 
 const _ = require('lodash');
 
-const createCallbackWrapper = input => {
+//this returns a higher order function that allows users to generate the callback URL
+//generation doesn't actually generate the URL (although we could use RPC if we wanted to)
+//instead it relies on the callbackUrl being passed in by the platform
+//as such it'll always return the same value.
+//calling this inner function will also mark the task as a CALLBACK status on return which will
+//effectively pause the Zap
+
+const createCallbackHigherOrderFunction = input => {
   let callbackUrl = _.get(input, '_zapier.event.callbackUrl');
-  let callbackWrapper = {};
-  Object.defineProperty(callbackWrapper, 'isUsed', {
-    get: function () {
-      return _.get(input, '_zapier.event.callbackUrl.isUsed');
-    }
-  })
-  Object.defineProperty(callbackWrapper, 'url', {
-    get: function () {
-      _.set(input, '_zapier.event.callbackUrl.isUsed', true);
-      return callbackUrl;
-    }
-  });
-  return callbackWrapper;
+  return function () {
+    _.set(input, '_zapier.event.callbackUrl.isUsed', true);
+    return callbackUrl;
+  }
 };
 
-module.exports = createCallbackWrapper;
+module.exports = createCallbackHigherOrderFunction;
