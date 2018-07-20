@@ -12,7 +12,7 @@ const _ = require('lodash');
 const createCallbackHigherOrderFunction = input => {
   let callbackUrl = _.get(input, '_zapier.event.callbackUrl');
   return function () {
-    _.set(input, '_zapier.event.callbackUrl.isUsed', true);
+    _.set(input, '_zapier.event.callbackUsed', true);
     return callbackUrl;
   }
 };

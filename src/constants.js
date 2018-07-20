@@ -51,7 +51,8 @@ const SAFE_LOG_KEYS = [
   'timestamp'
 ];
 const STATUSES = {
-  CALLBACK: 'CALLBACK'
+  CALLBACK: 'CALLBACK',
+  SUCCESS: 'SUCCESS'
 };
 
 module.exports = {
