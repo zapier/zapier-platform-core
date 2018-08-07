@@ -17,6 +17,16 @@ const createRpcClient = require('./create-rpc-client');
 const createHttpPatch = require('./create-http-patch');
 const schemaTools = require('./schema');
 
+const extendAppRaw = (base, extension) => {
+  const concatArray = (objValue, srcValue) => {
+    if (Array.isArray(objValue) && Array.isArray(srcValue)) {
+      return objValue.concat(srcValue);
+    }
+    return undefined;
+  };
+  return _.mergeWith(base, extension, concatArray);
+};
+
 const getAppRawOverride = (rpc, appRawOverride) => {
   return new ZapierPromise((resolve, reject) => {
     // Lambda keeps the container and /tmp directory around for a bit,
@@ -26,8 +36,13 @@ const getAppRawOverride = (rpc, appRawOverride) => {
     const hashPath = path.join('/tmp', 'cli-hash.txt');
 
     // If appRawOverride is too big, we send an md5 hash instead of JSON
-    if (!_.isString(appRawOverride)) {
-      return resolve(appRawOverride);
+    let appRawExtension;
+    if (Array.isArray(appRawOverride) && appRawOverride.length > 1) {
+      // appRawOverride can be ['<hash>', {'creates': {'foo': {...}}}]
+      appRawExtension = appRawOverride[1];
+      appRawOverride = appRawOverride[0];
+    } else if (typeof appRawOverride === 'object') {
+      resolve(appRawOverride);
     }
 
     // Check if it's "cached", to prevent unnecessary RPC calls
@@ -36,7 +51,9 @@ const getAppRawOverride = (rpc, appRawOverride) => {
       fs.existsSync(overridePath) &&
       fs.readFileSync(hashPath).toString() === appRawOverride
     ) {
-      return resolve(JSON.parse(fs.readFileSync(overridePath).toString()));
+      appRawOverride = JSON.parse(fs.readFileSync(overridePath).toString());
+      appRawOverride = extendAppRaw(appRawOverride, appRawExtension);
+      resolve(appRawOverride);
     }
 
     // Otherwise just get it via RPC
@@ -45,6 +62,8 @@ const getAppRawOverride = (rpc, appRawOverride) => {
         // "cache" it.
         fs.writeFileSync(hashPath, appRawOverride);
         fs.writeFileSync(overridePath, JSON.stringify(fetchedOverride));
+
+        fetchedOverride = extendAppRaw(fetchedOverride, appRawExtension);
 
         resolve(fetchedOverride);
       })

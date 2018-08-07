@@ -159,7 +159,57 @@ const doTest = runner => {
           should(true).eql(false, 'Should not have gotten results!');
         })
         .catch(err => {
-          // We're not mocking RPC here (a bit convoluted to do so), so it'll fail at that point
+          // TODO: We're not mocking RPC here (a bit convoluted to do so), so it'll fail at that point
+          err.message.should.startWith('No deploy key found.');
+          err.message.should.containEql('rely on the RPC API');
+        });
+    });
+
+    it('should handle array of [appRawOverrideHash, appRawExtension]', () => {
+      const definition = {
+        creates: {
+          foo: {
+            key: 'foo',
+            noun: 'Foo',
+            operation: {
+              perform: { source: 'return [{id: 45678}]' },
+              inputFields: [{ key: 'name', type: 'string' }]
+            }
+          }
+        }
+      };
+
+      const definitionExtension = {
+        creates: {
+          foo: {
+            noun: 'Foobar',
+            operation: {
+              inputFields: [{ key: 'message', type: 'string' }],
+              sample: {
+                id: 678
+              }
+            }
+          }
+        }
+      };
+
+      const definitionHash = crypto
+        .createHash('md5')
+        .update(JSON.stringify(definition))
+        .digest('hex');
+
+      const event = {
+        command: 'execute',
+        method: 'triggers.fooList.operation.perform',
+        appRawOverride: [definitionHash, definitionExtension]
+      };
+
+      return runner(event)
+        .then(() => {
+          should(true).eql(false, 'Should not have gotten results!');
+        })
+        .catch(err => {
+          // TODO: We're not mocking RPC here (a bit convoluted to do so), so it'll fail at that point
           err.message.should.startWith('No deploy key found.');
           err.message.should.containEql('rely on the RPC API');
         });
