@@ -31,23 +31,32 @@ const extendAppRaw = (base, extension) => {
 
 const getAppRawOverride = (rpc, appRawOverride) => {
   return new ZapierPromise((resolve, reject) => {
+    let appRawExtension;
+    if (Array.isArray(appRawOverride) && appRawOverride.length > 1) {
+      // If appRawOverride is too big, we send an md5 hash instead of JSON, so
+      // appRawOverride can be:
+      // - [appDefinition, {'creates': {'foo': {...}}}]
+      // - ['<hash>', {'creates': {'foo': {...}}}] if appRawOverride is too big
+      appRawExtension = appRawOverride[1];
+      appRawOverride = appRawOverride[0];
+      debugger;
+
+      if (typeof appRawOverride !== 'string') {
+        appRawOverride = extendAppRaw(appRawOverride, appRawExtension);
+        resolve(appRawOverride);
+        return;
+      }
+    } else if (typeof appRawOverride === 'object') {
+      resolve(appRawOverride);
+      return;
+    }
+
     // Lambda keeps the container and /tmp directory around for a bit,
     // so we can use that to "cache" the hash and override we fetched
     // from RPC before.
     const tmpdir = os.tmpdir();
     const overridePath = path.join(tmpdir, 'cli-override.json');
     const hashPath = path.join(tmpdir, 'cli-hash.txt');
-
-    // If appRawOverride is too big, we send an md5 hash instead of JSON
-    let appRawExtension;
-    if (Array.isArray(appRawOverride) && appRawOverride.length > 1) {
-      // appRawOverride can be ['<hash>', {'creates': {'foo': {...}}}]
-      appRawExtension = appRawOverride[1];
-      appRawOverride = appRawOverride[0];
-    } else if (typeof appRawOverride === 'object') {
-      resolve(appRawOverride);
-      return;
-    }
 
     // Check if it's "cached", to prevent unnecessary RPC calls
     if (
