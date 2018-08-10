@@ -39,7 +39,6 @@ const getAppRawOverride = (rpc, appRawOverride) => {
       // - ['<hash>', {'creates': {'foo': {...}}}] if appRawOverride is too big
       appRawExtension = appRawOverride[1];
       appRawOverride = appRawOverride[0];
-      debugger;
 
       if (typeof appRawOverride !== 'string') {
         appRawOverride = extendAppRaw(appRawOverride, appRawExtension);
