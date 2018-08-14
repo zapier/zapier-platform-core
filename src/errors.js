@@ -5,9 +5,10 @@ const util = require('util');
 
 // Make some of the errors we'll use!
 const createError = name => {
-  const NewError = function(message) {
+  const NewError = function(message, payload) {
     this.name = name;
     this.message = message || '';
+    this.payload = payload;
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
   };
@@ -23,7 +24,8 @@ const names = [
   'NotImplementedError',
   'MethodDoesNotExist',
   'RefreshAuthError',
-  'CheckError'
+  'CheckError',
+  'ContinuationError'
 ];
 
 const exceptions = _.reduce(
