@@ -5,8 +5,8 @@ let should = require('should');
 const CALLBACK_URL = 'http://example.com/callback';
 let input = {
   _zapier: {
-    callback: {
-      url: CALLBACK_URL
+    event: {
+      callbackUrl: CALLBACK_URL
     }
   }
 };
@@ -16,18 +16,17 @@ describe('callbackwrapper', () => {
   before(() => {
     wrapper = createCallbackWrapper(input);
   });
-  it('should expose a url property', () =>
-    wrapper.url.should.eql(CALLBACK_URL));
+  it('should return a function', () => wrapper().should.eql(CALLBACK_URL));
 
   describe('reading the callback', () => {
     before(() => {
       //was probably set from the previous test
-      delete input._zapier.callback.isUsed;
-      should.not.exist(input._zapier.callback.isUsed);
+      delete input._zapier.event.callbackUsed;
+      should.not.exist(input._zapier.event.callbackUsed);
     });
     it('should set the isUsed property', () => {
-      wrapper.url; // eslint-disable-line no-unused-expressions
-      input._zapier.callback.isUsed.should.eql(true);
+      wrapper(); // eslint-disable-line no-unused-expressions
+      input._zapier.event.callbackUsed.should.eql(true);
     });
   });
 });
@@ -38,7 +37,7 @@ describe('callbackStatusCatcher', () => {
   describe('when functions finish with an accessed callback', () => {
     let result;
     before(() => {
-      input._zapier.callback.isUsed = true;
+      input._zapier.event.callbackUsed = true;
       result = callbackStatusCatcher(output);
     });
     it('should turn result into an envelope', () => {
@@ -46,12 +45,12 @@ describe('callbackStatusCatcher', () => {
       result.__type.should.eql('OutputEnvelope');
     });
     it('should set callback flag on envelope', () =>
-      result.CALLBACK.should.be.eql(true));
+      result.status.should.be.eql('CALLBACK'));
   });
   describe('when functions finish without accessing callback', () => {
     let result;
     before(() => {
-      delete input._zapier.callback.isUsed;
+      delete input._zapier.event.callbackUsed;
       result = callbackStatusCatcher(output);
     });
     it('should not modify result', () => result.should.eql(output));

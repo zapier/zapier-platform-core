@@ -14,9 +14,9 @@ export const tools: { env: { inject: (filename?: string) => void } };
 export const createAppTester: (
   appRaw: object
 ) => <T extends any, B extends Bundle>(
-  func: (z: ZObject, bundle: B) => Promise<T>,
-  bundle?: Partial<B> // partial so we don't have to make a full bundle in tests
-) => T extends Promise<T> ? T : Promise<T>;
+    func: (z: ZObject, bundle: B) => Promise<T>,
+    bundle?: Partial<B> // partial so we don't have to make a full bundle in tests
+  ) => T extends Promise<T> ? T : Promise<T>;
 
 // internal only
 // export const integrationTestHandler: () => any;
@@ -126,11 +126,8 @@ export interface ZObject {
     get: () => Promise<string>;
     set: (cursor: string) => Promise<null>;
   };
-  callback: {
-    url: {
-      get: string
-    }
-  }
+  generateCallbackUrl: () => string
+
 
   /**
    * turns a file or request into a file into a publicly accessible url

@@ -56,10 +56,10 @@ const Contact = {
       label: 'Create Contact'
     },
     operation: {
-      perform: () => { }
+      perform: () => {}
     }
   },
-  outputFields: [{ key: 'id', type: 'string' }, () => { }] // or function
+  outputFields: [{ key: 'id', type: 'string' }, () => {}] // or function
 };
 
 const ContactError = {
@@ -281,7 +281,7 @@ const StaticInputFields = {
     operation: {
       inputFields: [{ key: 'key 1' }, { key: 'key 2' }, { key: 'key 3' }],
       outputFields: [{ key: 'key 1' }, { key: 'key 2' }, { key: 'key 3' }],
-      perform: () => { }
+      perform: () => {}
     }
   }
 };
@@ -305,7 +305,7 @@ const DynamicSyncInputFields = {
         { key: bundle.key2 },
         { key: bundle.key3 }
       ],
-      perform: () => { }
+      perform: () => {}
     }
   }
 };
@@ -325,7 +325,7 @@ const DynamicAsyncInputFields = {
       outputFields: [
         Promise.resolve([{ key: 'key 1' }, { key: 'key 2' }, { key: 'key 3' }])
       ],
-      perform: () => { }
+      perform: () => {}
     }
   }
 };
@@ -350,7 +350,7 @@ const MixedInputFields = {
         (z, bundle) => Promise.resolve({ key: bundle.key2 }),
         Promise.resolve({ key: 'key 3' })
       ],
-      perform: () => { }
+      perform: () => {}
     }
   }
 };
@@ -439,10 +439,10 @@ const ExecuteCallbackRequest = {
       description: 'Used for one-offs in the tests.'
     },
     operation: {
-      perform: (z, bundle) => {
+      perform: z => {
         //we need to access the callback url
-        let callbackUrl = z.callback.url;
-        return { callbackUrl, inputValue: bundle.inputData.test };
+        let callbackUrl = z.generateCallbackUrl();
+        return { callbackUrl };
       },
       inputFields: [
         {
@@ -518,7 +518,7 @@ const App = {
     [ExecuteCallbackRequest.key]: ExecuteCallbackRequest
   },
   hydrators: {
-    getBigStuff: () => { }
+    getBigStuff: () => {}
   }
 };
 
