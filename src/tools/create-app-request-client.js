@@ -11,6 +11,7 @@ const createInjectInputMiddleware = require('../http-middlewares/before/inject-i
 const prepareRequest = require('../http-middlewares/before/prepare-request');
 const addQueryParams = require('../http-middlewares/before/add-query-params');
 const addBasicAuthHeader = require('../http-middlewares/before/add-basic-auth-header');
+const disableSSLCertCheck = require('../http-middlewares/before/disable-ssl-cert-check');
 
 // after middles
 const prepareResponse = require('../http-middlewares/after/prepare-response');
@@ -40,6 +41,11 @@ const createAppRequestClient = (input, options) => {
   }
 
   httpBefores.push(addQueryParams);
+
+  const verify = _.get(input, '_zapier.event.verify');
+  if (verify === false) {
+    httpBefores.push(disableSSLCertCheck);
+  }
 
   const httpOriginalAfters = [prepareResponse, logResponse];
 
