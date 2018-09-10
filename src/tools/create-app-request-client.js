@@ -42,8 +42,8 @@ const createAppRequestClient = (input, options) => {
 
   httpBefores.push(addQueryParams);
 
-  const verify = _.get(input, '_zapier.event.verify');
-  if (verify === false) {
+  const verifySSL = _.get(input, '_zapier.event.verifySSL');
+  if (verifySSL === false) {
     httpBefores.push(disableSSLCertCheck);
   }
 

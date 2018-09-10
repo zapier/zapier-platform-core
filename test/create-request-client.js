@@ -357,7 +357,7 @@ describe('request client', () => {
 
   it('should allow to disable SSL certificate check', () => {
     const newInput = _.cloneDeep(input);
-    newInput._zapier.event.verify = false;
+    newInput._zapier.event.verifySSL = false;
     const request = createAppRequestClient(newInput);
     return request('https://self-signed.badssl.com').then(response => {
       response.status.should.eql(200);
