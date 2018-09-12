@@ -280,7 +280,7 @@ const doTest = runner => {
       });
     });
 
-    it.only('should not leave leftover env vars', () => {
+    it('should not leave leftover env vars', () => {
       const event = {
         environment: {
           _ZAPIER_FOO: 'foo'
