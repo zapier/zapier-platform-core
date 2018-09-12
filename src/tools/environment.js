@@ -27,6 +27,14 @@ const cleanEnvironment = () => {
     delete process.env.AWS_SESSION_TOKEN;
     delete process.env.AWS_SECRET_ACCESS_KEY;
   }
+
+  // Lambda may reuse container, which leaves leftovers in process.env. Let's clean
+  // up Zapier specific stuff here.
+  _.each(process.env, (val, key) => {
+    if (key.startsWith('_ZAPIER')) {
+      delete process.env[key];
+    }
+  });
 };
 
 const localFilepath = filename => {
