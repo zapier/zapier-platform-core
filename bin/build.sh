@@ -34,6 +34,10 @@ cd $BUILD_DIR/package
 
 npm install --production
 
+echo "Top 10 biggest dependent Node packages, FYI:"
+
+du -s node_modules/* | sort -n -r | head -n 10
+
 find . -print | \
     # removing test and example is bold!
     grep -v "\.git" | \
@@ -50,7 +54,7 @@ find . -print | \
     grep -v "\.sh" | \
     grep -v "\.zip" | \
     grep -v "tags" | \
-    zip $1 -@
+    zip $1 -@ > /dev/null
 
 cp ./local.bundle.zip $CORE_REPO_DIR/
 
