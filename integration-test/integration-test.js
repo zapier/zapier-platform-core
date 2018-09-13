@@ -283,14 +283,14 @@ const doTest = runner => {
     it('should not leave leftover env vars', () => {
       const event = {
         environment: {
-          _ZAPIER_FOO: 'foo'
+          _ZAPIER_ONE_TIME_SECRET: 'foo'
         },
         method: 'resources.env.list.operation.perform'
       };
       return runner(event)
         .then(response => {
           response.results.length.should.eql(1);
-          response.results[0].key.should.eql('_ZAPIER_FOO');
+          response.results[0].key.should.eql('_ZAPIER_ONE_TIME_SECRET');
           response.results[0].value.should.eql('foo');
 
           delete event.environment;

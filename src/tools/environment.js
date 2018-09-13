@@ -8,6 +8,8 @@ const ensurePath = require('./ensure-path');
 
 const { IS_TESTING } = require('../constants');
 
+const ENV_VARS_TO_CLEAN = ['_ZAPIER_ONE_TIME_SECRET'];
+
 // Copy bundle environment into process.env, and vice versa,
 // for convenience and compatibility with native environment vars.
 const applyEnvironment = event => {
@@ -30,11 +32,9 @@ const cleanEnvironment = () => {
 
   // Lambda may reuse container, which leaves leftovers in process.env. Let's clean
   // up Zapier specific stuff here.
-  _.each(process.env, (val, key) => {
-    if (key.startsWith('_ZAPIER')) {
-      delete process.env[key];
-    }
-  });
+  for (const name of ENV_VARS_TO_CLEAN) {
+    delete process.env[name];
+  }
 };
 
 const localFilepath = filename => {
