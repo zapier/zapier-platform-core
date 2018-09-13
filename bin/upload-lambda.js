@@ -34,6 +34,7 @@ lambda.updateFunctionCode(
       console.log(err, err.stack); // an error occurred
     } else {
       console.log(data); // successful response
+      console.log('Now you can try `npm run lambda-integration-test`.');
     }
   }
 );
