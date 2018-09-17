@@ -32,9 +32,9 @@ const cleanEnvironment = () => {
 
   // Lambda may reuse container, which leaves leftovers in process.env. Let's clean
   // up Zapier specific stuff here.
-  for (const name of ENV_VARS_TO_CLEAN) {
+  ENV_VARS_TO_CLEAN.forEach(name => {
     delete process.env[name];
-  }
+  });
 };
 
 const localFilepath = filename => {
