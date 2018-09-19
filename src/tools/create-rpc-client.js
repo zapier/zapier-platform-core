@@ -48,9 +48,7 @@ const createRpcClient = event => {
         if (res.content) {
           if (res.content.id !== id) {
             throw new Error(
-              `Got id ${res.content.id} but expected ${id} ${
-                res.content
-              } when calling RPC`
+              `Got id ${res.content.id} but expected ${id} when calling RPC`
             );
           }
           return res.content;
