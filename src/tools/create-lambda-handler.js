@@ -83,7 +83,6 @@ const getAppRawOverride = (rpc, appRawOverride) => {
 
       if (typeof appRawOverride !== 'string') {
         appRawOverride = extendAppRaw(appRawOverride, appRawExtension);
-        console.log(appRawOverride);
         resolve(appRawOverride);
         return;
       }
