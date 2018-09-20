@@ -76,6 +76,14 @@ describe('hydration', () => {
       delete process.env._ZAPIER_ONE_TIME_SECRET;
     });
 
+    it('should not allow request as the first argument', () => {
+      (() => {
+        dehydrateFile({ url: 'https://zpr.io/file' });
+      }).should.throw(
+        'First argument must be either null, a URL (string), or a hydrator function! We got object.'
+      );
+    });
+
     it('should not allow missing function', () => {
       const inputData = { key: 'value' };
       (() => {

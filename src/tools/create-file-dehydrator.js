@@ -48,7 +48,7 @@ const createFileDehydrator = input => {
     }
     if (arg0 && typeof arg0 !== 'string') {
       throw new DehydrateError(
-        'First argument () must be either null, a URL (string), or a hydrator function!'
+        `First argument must be either null, a URL (string), or a hydrator function! We got ${typeof arg0}.`
       );
     }
     return dehydrateFileFromRequest.apply(this, args);
