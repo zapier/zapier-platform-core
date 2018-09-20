@@ -7,8 +7,6 @@ const { DehydrateError } = require('../errors');
 const resolveMethodPath = require('./resolve-method-path');
 const wrapHydrate = require('./wrap-hydrate');
 
-const MAX_PAYLOAD_SIZE = 2048; // most urls cannot be larger than 2,083
-
 const createFileDehydrator = input => {
   const app = _.get(input, '_zapier.app');
 
@@ -21,24 +19,10 @@ const createFileDehydrator = input => {
         'You must provide either url or request arguments!'
       );
     }
-
-    const inputData = {
-      url,
-      request,
-      meta
-    };
-
-    const payloadSize = JSON.stringify(inputData).length;
-    if (payloadSize > MAX_PAYLOAD_SIZE) {
-      throw new DehydrateError(
-        `Oops! You passed too much data (${payloadSize} bytes) to your dehydration function - try slimming it down under ${MAX_PAYLOAD_SIZE} bytes (usually by just passing the needed IDs).`
-      );
-    }
-
     return wrapHydrate({
       type: 'file',
       method: `hydrators.${DEFAULT_FILE_HYDRATOR_NAME}`,
-      bundle: inputData
+      bundle: { url, request, meta }
     });
   };
 
@@ -47,12 +31,6 @@ const createFileDehydrator = input => {
     if (inputData.inputData) {
       throw new DehydrateError(
         'Oops! You passed a full `bundle` - really you should pass what you want under `inputData`!'
-      );
-    }
-    const payloadSize = JSON.stringify(inputData).length;
-    if (payloadSize > MAX_PAYLOAD_SIZE) {
-      throw new DehydrateError(
-        `Oops! You passed too much data (${payloadSize} bytes) to your dehydration function - try slimming it down under ${MAX_PAYLOAD_SIZE} bytes (usually by just passing the needed IDs).`
       );
     }
     return wrapHydrate({
