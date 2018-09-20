@@ -26,7 +26,48 @@ const extendAppRaw = (base, extension) => {
     }
     return undefined;
   };
-  return _.mergeWith(base, extension, concatArray);
+  const deletePerformIfBeingOverridden = (_base, _extension) => {
+    // Delete "test" from auth and "perform" from _base's triggers, creates, and searches,
+    // if it exists in _extension, in order to not have multiple possibilities (request, function, source)
+    if (
+      _.get(_extension, ['authentication', 'test']) &&
+      _.get(_base, ['authentication', 'test'])
+    ) {
+      delete _base.authentication.test;
+    }
+
+    const topLevelKeys = ['triggers', 'creates', 'searches'];
+    topLevelKeys.forEach(topLevelKey => {
+      if (!_.get(_extension, [topLevelKey])) {
+        return;
+      }
+
+      Object.keys(_extension[topLevelKey]).forEach(extensionTopLevelKey => {
+        if (
+          _.get(_extension, [
+            topLevelKey,
+            extensionTopLevelKey,
+            'operation',
+            'perform'
+          ]) &&
+          _.get(_base, [
+            topLevelKey,
+            extensionTopLevelKey,
+            'operation',
+            'perform'
+          ])
+        ) {
+          delete _base[topLevelKey][extensionTopLevelKey].operation.perform;
+        }
+      });
+    });
+    return _base;
+  };
+  return _.mergeWith(
+    deletePerformIfBeingOverridden(base, extension),
+    extension,
+    concatArray
+  );
 };
 
 const getAppRawOverride = (rpc, appRawOverride) => {
@@ -42,6 +83,7 @@ const getAppRawOverride = (rpc, appRawOverride) => {
 
       if (typeof appRawOverride !== 'string') {
         appRawOverride = extendAppRaw(appRawOverride, appRawExtension);
+        console.log(appRawOverride);
         resolve(appRawOverride);
         return;
       }
