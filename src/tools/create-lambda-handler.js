@@ -19,55 +19,42 @@ const environmentTools = require('./environment');
 const schemaTools = require('./schema');
 const ZapierPromise = require('./promise');
 
+const RequestSchema = require('zapier-platform-schema/lib/schemas/RequestSchema');
+const FunctionSchema = require('zapier-platform-schema/lib/schemas/FunctionSchema');
+
+const isRequestOrFunction = obj => {
+  return (
+    RequestSchema.validate(obj).valid || FunctionSchema.validate(obj).valid
+  );
+};
+
 const extendAppRaw = (base, extension) => {
-  const concatArray = (objValue, srcValue) => {
+  const keysToOverride = [
+    'test',
+    'perform',
+    'performList',
+    'performSubscribe',
+    'performUnsubscribe'
+  ];
+  const concatArray = (objValue, srcValue, key) => {
     if (Array.isArray(objValue) && Array.isArray(srcValue)) {
       return objValue.concat(srcValue);
     }
-    return undefined;
-  };
-  const deletePerformIfBeingOverridden = (_base, _extension) => {
-    // Delete "test" from auth and "perform" from _base's triggers, creates, and searches,
-    // if it exists in _extension, in order to not have multiple possibilities (request, function, source)
+
     if (
-      _.get(_extension, ['authentication', 'test']) &&
-      _.get(_base, ['authentication', 'test'])
+      // Do full replacement when it comes to keysToOverride
+      keysToOverride.indexOf(key) !== -1 &&
+      _.isPlainObject(srcValue) &&
+      _.isPlainObject(objValue) &&
+      isRequestOrFunction(srcValue) &&
+      isRequestOrFunction(objValue)
     ) {
-      delete _base.authentication.test;
+      return srcValue;
     }
 
-    const topLevelKeys = ['triggers', 'creates', 'searches'];
-    topLevelKeys.forEach(topLevelKey => {
-      if (!_.get(_extension, [topLevelKey])) {
-        return;
-      }
-
-      Object.keys(_extension[topLevelKey]).forEach(extensionTopLevelKey => {
-        if (
-          _.get(_extension, [
-            topLevelKey,
-            extensionTopLevelKey,
-            'operation',
-            'perform'
-          ]) &&
-          _.get(_base, [
-            topLevelKey,
-            extensionTopLevelKey,
-            'operation',
-            'perform'
-          ])
-        ) {
-          delete _base[topLevelKey][extensionTopLevelKey].operation.perform;
-        }
-      });
-    });
-    return _base;
+    return undefined;
   };
-  return _.mergeWith(
-    deletePerformIfBeingOverridden(base, extension),
-    extension,
-    concatArray
-  );
+  return _.mergeWith(base, extension, concatArray);
 };
 
 const getAppRawOverride = (rpc, appRawOverride) => {

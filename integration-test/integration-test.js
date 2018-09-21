@@ -387,6 +387,103 @@ const doTest = runner => {
       });
     });
 
+    it('should handle array of [appRawOverrideHash, appRawExtension] and add perform', () => {
+      const definition = {
+        triggers: {
+          test: {
+            key: 'test',
+            noun: 'Foo',
+            operation: {
+              type: 'hook',
+              performList: { source: 'return [{id: 54321}]' }
+            }
+          }
+        }
+      };
+
+      mocky.mockRpcCall(definition);
+
+      const definitionExtension = {
+        triggers: {
+          test: {
+            operation: {
+              perform: { source: 'return [{id: 12345}]' }
+            }
+          }
+        }
+      };
+
+      const definitionHash = crypto
+        .createHash('md5')
+        .update(JSON.stringify(definition))
+        .digest('hex');
+
+      const event = {
+        command: 'execute',
+        method: 'triggers.test.operation.perform',
+        appRawOverride: [definitionHash, definitionExtension],
+        rpc_base: 'http://mock.zapier.com/platform/rpc/cli',
+        token: 'fake'
+      };
+
+      return runner(event).then(response => {
+        response.results.should.eql([
+          {
+            id: 12345
+          }
+        ]);
+      });
+    });
+
+    it('should handle array of [appRawOverrideHash, appRawExtension] and add new trigger', () => {
+      const definition = {
+        triggers: {
+          test: {
+            key: 'test',
+            noun: 'Foo',
+            operation: {
+              perform: { source: 'return [{id: 54321}]' }
+            }
+          }
+        }
+      };
+
+      mocky.mockRpcCall(definition);
+
+      const definitionExtension = {
+        triggers: {
+          perform: {
+            key: 'perform',
+            noun: 'Foo',
+            operation: {
+              perform: { source: 'return [{id: 12345}]' }
+            }
+          }
+        }
+      };
+
+      const definitionHash = crypto
+        .createHash('md5')
+        .update(JSON.stringify(definition))
+        .digest('hex');
+
+      const event = {
+        command: 'execute',
+        method: 'triggers.perform.operation.perform',
+        appRawOverride: [definitionHash, definitionExtension],
+        rpc_base: 'http://mock.zapier.com/platform/rpc/cli',
+        token: 'fake'
+      };
+
+      return runner(event).then(response => {
+        response.results.should.eql([
+          {
+            id: 12345
+          }
+        ]);
+      });
+    });
+
     it('should handle function source in beforeRequest', () => {
       const definition = {
         beforeRequest: [
