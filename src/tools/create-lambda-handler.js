@@ -36,7 +36,7 @@ const extendAppRaw = (base, extension) => {
     'performSubscribe',
     'performUnsubscribe'
   ];
-  const concatArray = (objValue, srcValue, key) => {
+  const concatArrayAndOverrideKeys = (objValue, srcValue, key) => {
     if (Array.isArray(objValue) && Array.isArray(srcValue)) {
       return objValue.concat(srcValue);
     }
@@ -54,7 +54,7 @@ const extendAppRaw = (base, extension) => {
 
     return undefined;
   };
-  return _.mergeWith(base, extension, concatArray);
+  return _.mergeWith(base, extension, concatArrayAndOverrideKeys);
 };
 
 const getAppRawOverride = (rpc, appRawOverride) => {
