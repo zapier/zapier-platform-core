@@ -430,7 +430,6 @@ describe('create-app', () => {
           done('expected an error, got success');
         })
         .catch(error => {
-          debugger;
           error.name.should.eql('RefreshAuthError');
           done();
         });
