@@ -9,16 +9,15 @@ const path = require('path');
 require('should');
 const AdmZip = require('adm-zip');
 const fetch = require('node-fetch');
-const parallel = require('mocha.parallel');
 
 const TEST_REPOS = [
   'zapier-platform-example-app-basic-auth',
   'zapier-platform-example-app-create',
-  'zapier-platform-example-app-custom-auth',
-  'zapier-platform-example-app-oauth2',
-  'zapier-platform-example-app-resource',
-  'zapier-platform-example-app-search',
-  'zapier-platform-example-app-session-auth',
+  // 'zapier-platform-example-app-custom-auth',
+  // 'zapier-platform-example-app-oauth2',
+  // 'zapier-platform-example-app-resource',
+  // 'zapier-platform-example-app-search',
+  // 'zapier-platform-example-app-session-auth',
   'zapier-platform-example-app-trigger'
 ];
 
@@ -179,65 +178,63 @@ describe('smoke tests - setup will take some time', () => {
     newSize.should.be.within(baselineSize * 0.7, baselineSize * 1.3);
   });
 
-  parallel('testing each repo in parallel', () => {
-    TEST_REPOS.forEach(repoName => {
-      describe(repoName, () => {
-        before(async () => {
-          context.workdir = setupTempWorkingDir();
+  TEST_REPOS.forEach(repoName => {
+    describe(repoName, () => {
+      before(async () => {
+        context.workdir = setupTempWorkingDir();
 
-          const repoZipPath = await downloadRepoZip(repoName, context.workdir);
-          extractRepoZip(repoZipPath, context.workdir);
+        const repoZipPath = await downloadRepoZip(repoName, context.workdir);
+        extractRepoZip(repoZipPath, context.workdir);
 
-          npmInstalls(context.package.path, context.workdir);
+        npmInstalls(context.package.path, context.workdir);
 
-          context.hasAppRC = setupZapierAppRC(context.workdir);
+        context.hasAppRC = setupZapierAppRC(context.workdir);
 
-          context.cliBin = path.join(
-            context.workdir,
-            'node_modules',
-            '.bin',
-            'zapier'
-          );
+        context.cliBin = path.join(
+          context.workdir,
+          'node_modules',
+          '.bin',
+          'zapier'
+        );
 
-          setupZapierAppRC(context.workdir);
+        setupZapierAppRC(context.workdir);
+      });
+
+      after(() => {
+        fs.removeSync(context.workdir);
+      });
+
+      it('zapier test', () => {
+        const proc = spawnSync(context.cliBin, ['test'], {
+          encoding: 'utf8',
+          cwd: context.workdir
         });
+        if (proc.status !== 0) {
+          console.log(proc.stdout);
+          console.log(proc.stderr);
+        }
+        proc.status.should.eql(0);
+      });
 
-        after(() => {
-          fs.removeSync(context.workdir);
-        });
+      it('zapier build', function() {
+        if (!context.hasAppRC) {
+          this.skip();
+          return;
+        }
 
-        it('zapier test', () => {
-          const proc = spawnSync(context.cliBin, ['test'], {
-            encoding: 'utf8',
-            cwd: context.workdir
-          });
-          if (proc.status !== 0) {
-            console.log(proc.stdout);
-            console.log(proc.stderr);
+        const proc = spawnSync(context.cliBin, ['build'], {
+          encoding: 'utf8',
+          cwd: context.workdir,
+          env: {
+            SKIP_NPM_INSTALL: '1',
+            PATH: process.env.PATH
           }
-          proc.status.should.eql(0);
         });
-
-        it('zapier build', function() {
-          if (!context.hasAppRC) {
-            this.skip();
-            return;
-          }
-
-          const proc = spawnSync(context.cliBin, ['build'], {
-            encoding: 'utf8',
-            cwd: context.workdir,
-            env: {
-              SKIP_NPM_INSTALL: '1',
-              PATH: process.env.PATH
-            }
-          });
-          if (proc.status !== 0) {
-            console.log(proc.stdout);
-            console.log(proc.stderr);
-          }
-          proc.status.should.eql(0);
-        });
+        if (proc.status !== 0) {
+          console.log(proc.stdout);
+          console.log(proc.stderr);
+        }
+        proc.status.should.eql(0);
       });
     });
   });
