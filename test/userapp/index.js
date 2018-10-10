@@ -496,6 +496,10 @@ const changeStatusOnErrorResponses = response => {
     return response;
   }
 
+  if (response.request.raw) {
+    return response;
+  }
+
   const data = JSON.parse(response.content);
   const error = data.args.error;
   if (response.status === 200 && error) {
