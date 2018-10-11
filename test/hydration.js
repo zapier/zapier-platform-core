@@ -2,7 +2,6 @@
 
 require('should');
 
-const { DEFAULT_FILE_HYDRATOR_NAME } = require('../src/constants');
 const createDehydrator = require('../src/tools/create-dehydrator');
 const funcToFind = () => {};
 const funcToMiss = () => {};
