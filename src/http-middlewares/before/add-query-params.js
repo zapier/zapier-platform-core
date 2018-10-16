@@ -21,7 +21,7 @@ const addQueryParams = req => {
   if (Object.keys(req.params || {}).length) {
     const splitter = req.url.indexOf('?') === -1 ? '?' : '&';
 
-    if (req.omitEmptyParams === true) {
+    if (req.omitEmptyParams) {
       removeEmptyParams(req.params);
     }
 
