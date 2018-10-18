@@ -19,7 +19,7 @@ describe('app middleware', () => {
     const appDefinition = dataTools.deepCopy(exampleAppDefinition);
     appDefinition.beforeApp = [
       input => {
-        // We swap up the invocation to run a real method
+        // Swap up context to point to a real method
         input._zapier.event.method = 'resources.list.list.operation.perform';
         return input;
       }
@@ -27,6 +27,7 @@ describe('app middleware', () => {
     const app = createApp(appDefinition);
 
     // Create the input to point to a non-existent method on the app
+    // the before middleware is gonna re-route this to a real method
     const input = createTestInput(
       'something.that.does.not.exist',
       appDefinition
@@ -50,7 +51,8 @@ describe('app middleware', () => {
     ];
     const app = createApp(appDefinition);
 
-    // Create the input to point to a non-existent method on the app
+    // We are gonna invoke this method, but the after middleware is gonna
+    // change the result returned to something else
     const input = createTestInput(
       'resources.list.list.operation.perform',
       appDefinition
