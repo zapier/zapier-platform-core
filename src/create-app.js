@@ -25,16 +25,19 @@ const createApp = appRaw => {
   const frozenCompiledApp = schemaTools.prepareApp(appRaw);
 
   // standard before middlewares
-  const befores = [addAppContext, injectZObject].concat(
-    ensureArray(frozenCompiledApp.beforeApp)
-  );
+  const befores = [
+    addAppContext,
+    injectZObject,
+    ...ensureArray(frozenCompiledApp.beforeApp)
+  ];
 
   // standard after middlewares
   const afters = [
     checkOutput,
     largeResponseCachePointer,
-    waitForPromises
-  ].concat(ensureArray(frozenCompiledApp.afterApp));
+    waitForPromises,
+    ...ensureArray(frozenCompiledApp.afterApp)
+  ];
 
   const app = createCommandHandler(frozenCompiledApp);
   return applyMiddleware(befores, afters, app);
