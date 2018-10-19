@@ -104,8 +104,7 @@ const buildDigestHeader = (username, password, url, method, creds) => {
     creds.qop === 'auth' ||
     creds.qop.split(',').indexOf('auth') >= 0
   ) {
-    cnonce = '575c7f6b0fbcda9c';
-    // cnonce = md5(Date.now().toString()).substr(0, 16);
+    cnonce = md5(Date.now().toString()).substr(0, 16);
     response = md5(`${HA1}:${creds.nonce}:00000001:${cnonce}:auth:${HA2}`);
   } else {
     throw new NotImplementedError(
