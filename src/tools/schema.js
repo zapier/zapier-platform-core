@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+
 const cleaner = require('./cleaner');
 const dataTools = require('./data');
 const schemaTools = require('./schema-tools');

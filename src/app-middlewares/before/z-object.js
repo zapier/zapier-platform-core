@@ -22,7 +22,8 @@ const injectZObject = input => {
     console: createLoggerConsole(input),
     JSON: createJSONtool(),
     hash: hashing.hashify,
-    dehydrate: createDehydrator(input),
+    dehydrate: createDehydrator(input, 'method'),
+    dehydrateFile: createDehydrator(input, 'file'),
     stashFile: createFileStasher(input),
     cursor: createStoreKeyTool(input),
     generateCallbackUrl: createCallbackHigherOrderFunction(input),
@@ -35,8 +36,7 @@ const injectZObject = input => {
     request: createAppRequestClient(input, { extraArgs: [zSkinny, bundle] })
   });
 
-  const app = _.get(input, '_zapier.app');
-  const runner = createLegacyScriptingRunner(z, app);
+  const runner = createLegacyScriptingRunner(z, input);
   if (runner) {
     z.legacyScripting = runner;
   }

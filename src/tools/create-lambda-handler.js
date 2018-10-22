@@ -1,34 +1,89 @@
 'use strict';
 
-const _ = require('lodash');
-const fs = require('fs');
-const path = require('path');
 const domain = require('domain');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
+const _ = require('lodash');
+
+const checkMemory = require('./memory-checker');
+const cleaner = require('./cleaner');
 const constants = require('../constants');
 const createApp = require('../create-app');
-const createLogger = require('./create-logger');
-const createInput = require('./create-input');
-const cleaner = require('./cleaner');
-const ZapierPromise = require('./promise');
-const environmentTools = require('./environment');
-const checkMemory = require('./memory-checker');
-const createRpcClient = require('./create-rpc-client');
 const createHttpPatch = require('./create-http-patch');
+const createInput = require('./create-input');
+const createLogger = require('./create-logger');
+const createRpcClient = require('./create-rpc-client');
+const environmentTools = require('./environment');
 const schemaTools = require('./schema');
+const ZapierPromise = require('./promise');
+
+const RequestSchema = require('zapier-platform-schema/lib/schemas/RequestSchema');
+const FunctionSchema = require('zapier-platform-schema/lib/schemas/FunctionSchema');
+
+const isRequestOrFunction = obj => {
+  return (
+    RequestSchema.validate(obj).valid || FunctionSchema.validate(obj).valid
+  );
+};
+
+const extendAppRaw = (base, extension) => {
+  const keysToOverride = [
+    'test',
+    'perform',
+    'performList',
+    'performSubscribe',
+    'performUnsubscribe'
+  ];
+  const concatArrayAndOverrideKeys = (objValue, srcValue, key) => {
+    if (Array.isArray(objValue) && Array.isArray(srcValue)) {
+      return objValue.concat(srcValue);
+    }
+
+    if (
+      // Do full replacement when it comes to keysToOverride
+      keysToOverride.indexOf(key) !== -1 &&
+      _.isPlainObject(srcValue) &&
+      _.isPlainObject(objValue) &&
+      isRequestOrFunction(srcValue) &&
+      isRequestOrFunction(objValue)
+    ) {
+      return srcValue;
+    }
+
+    return undefined;
+  };
+  return _.mergeWith(base, extension, concatArrayAndOverrideKeys);
+};
 
 const getAppRawOverride = (rpc, appRawOverride) => {
   return new ZapierPromise((resolve, reject) => {
+    let appRawExtension;
+    if (Array.isArray(appRawOverride) && appRawOverride.length > 1) {
+      // If appRawOverride is too big, we send an md5 hash instead of JSON, so
+      // appRawOverride can be:
+      // - [appDefinition, {'creates': {'foo': {...}}}]
+      // - ['<hash>', {'creates': {'foo': {...}}}] if appRawOverride is too big
+      appRawExtension = appRawOverride[1];
+      appRawOverride = appRawOverride[0];
+
+      if (typeof appRawOverride !== 'string') {
+        appRawOverride = extendAppRaw(appRawOverride, appRawExtension);
+        resolve(appRawOverride);
+        return;
+      }
+    } else if (typeof appRawOverride === 'object') {
+      resolve(appRawOverride);
+      return;
+    }
+
     // Lambda keeps the container and /tmp directory around for a bit,
     // so we can use that to "cache" the hash and override we fetched
     // from RPC before.
-    const overridePath = path.join('/tmp', 'cli-override.json');
-    const hashPath = path.join('/tmp', 'cli-hash.txt');
-
-    // If appRawOverride is too big, we send an md5 hash instead of JSON
-    if (!_.isString(appRawOverride)) {
-      return resolve(appRawOverride);
-    }
+    const tmpdir = os.tmpdir();
+    const overridePath = path.join(tmpdir, 'cli-override.json');
+    const hashPath = path.join(tmpdir, 'cli-hash.txt');
 
     // Check if it's "cached", to prevent unnecessary RPC calls
     if (
@@ -36,15 +91,20 @@ const getAppRawOverride = (rpc, appRawOverride) => {
       fs.existsSync(overridePath) &&
       fs.readFileSync(hashPath).toString() === appRawOverride
     ) {
-      return resolve(JSON.parse(fs.readFileSync(overridePath).toString()));
+      appRawOverride = JSON.parse(fs.readFileSync(overridePath).toString());
+      appRawOverride = extendAppRaw(appRawOverride, appRawExtension);
+      resolve(appRawOverride);
+      return;
     }
 
     // Otherwise just get it via RPC
-    return rpc('get_definition_override')
+    rpc('get_definition_override')
       .then(fetchedOverride => {
         // "cache" it.
         fs.writeFileSync(hashPath, appRawOverride);
         fs.writeFileSync(overridePath, JSON.stringify(fetchedOverride));
+
+        fetchedOverride = extendAppRaw(fetchedOverride, appRawExtension);
 
         resolve(fetchedOverride);
       })
@@ -109,10 +169,10 @@ const createLambdaHandler = appRawOrPath => {
       // the default behavior with callbacks anyway, but don't want
       // to rely on that.
       logger(logMsg, logData).then(() => {
-        if (!constants.IS_TESTING) {
-          err.message +=
-            '\n\nConsole logs:\n' +
-            logBuffer.map(s => `  ${s.message}`).join('');
+        if (!constants.IS_TESTING && err) {
+          err.message += `\n\nConsole logs:\n${logBuffer
+            .map(s => `  ${s.message}`)
+            .join('')}`;
         }
         callbackOnce(err);
       });
@@ -121,7 +181,8 @@ const createLambdaHandler = appRawOrPath => {
     const handlerDomain = domain.create();
 
     handlerDomain.on('error', err => {
-      const logMsg = `Uncaught error: ${err}\n${err.stack || '<stack>'}`;
+      const logMsg = `Uncaught error: ${err}\n${(err && err.stack) ||
+        '<stack>'}`;
       const logData = { err, log_type: 'error' };
       logErrorAndCallbackOnce(logMsg, logData, err);
     });
@@ -148,7 +209,8 @@ const createLambdaHandler = appRawOrPath => {
           callbackOnce(null, cleaner.maskOutput(output));
         })
         .catch(err => {
-          const logMsg = `Unhandled error: ${err}\n${err.stack || '<stack>'}`;
+          const logMsg = `Unhandled error: ${err}\n${(err && err.stack) ||
+            '<stack>'}`;
           const logData = { err, log_type: 'error' };
           logErrorAndCallbackOnce(logMsg, logData, err);
         });
