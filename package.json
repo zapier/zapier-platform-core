@@ -1,6 +1,6 @@
 {
   "name": "zapier-platform-core",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "description": "The core SDK for CLI apps in the Zapier Developer Platform.",
   "repository": "zapier/zapier-platform-core",
   "homepage": "https://zapier.com/",
