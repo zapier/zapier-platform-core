@@ -61,21 +61,22 @@ const parseDictHeader = s => {
   const res = {};
 
   const items = parseHttpList(s);
-  for (let item of items) {
-    if (item.indexOf('=') === -1) {
+
+  items.forEach(item => {
+    if (item.includes('=')) {
+      const parts = item.split('=');
+      const name = parts[0];
+      let value = parts.slice(1).join('=');
+
+      if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
+        value = value.substring(1, value.length - 1);
+      }
+      res[name] = value;
+    } else {
       res[item] = null;
-      continue;
     }
+  });
 
-    const parts = item.split('=');
-    const name = parts[0];
-    let value = parts.slice(1).join('=');
-
-    if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
-      value = value.substring(1, value.length - 1);
-    }
-    res[name] = value;
-  }
   return res;
 };
 
