@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const memoize = require('./memoize');
 const plainModule = require('./plain');
+const crypto = require('crypto');
 
 const isPlainObj = o => {
   return (
@@ -173,16 +174,23 @@ const simpleTruncate = (string, length, suffix) => {
 
 const genId = () => parseInt(Math.random() * 100000000);
 
+const md5 = s =>
+  crypto
+    .createHash('md5')
+    .update(s)
+    .digest('hex');
+
 module.exports = {
-  isPlainObj,
-  findMapDeep,
-  memoizedFindMapDeep,
   deepCopy,
-  jsonCopy,
   deepFreeze,
-  recurseReplace,
-  recurseExtract,
+  findMapDeep,
   flattenPaths,
-  simpleTruncate,
-  genId
+  genId,
+  isPlainObj,
+  jsonCopy,
+  md5,
+  memoizedFindMapDeep,
+  recurseExtract,
+  recurseReplace,
+  simpleTruncate
 };
