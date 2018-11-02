@@ -355,6 +355,7 @@ describe('http addBasicAuthHeader before middelware', () => {
       body: 'number=555&message=hi',
       auth: {
         realm: 'a_realm',
+        oauth_callback: 'https://example.com/callback',
         oauth_consumer_key: 'a_consumer_key',
         oauth_consumer_secret: 'a_consumer_secret',
         oauth_token: 'a_token',
@@ -374,13 +375,15 @@ describe('http addBasicAuthHeader before middelware', () => {
 
     // Can use http://bettiolo.github.io/oauth-reference-page/ to verify the result
     params.should.eql({
+      oauth_callback: 'https%3A%2F%2Fexample.com%2Fcallback',
       oauth_consumer_key: 'a_consumer_key',
       oauth_nonce: 'a_nonce',
-      oauth_signature: 'HcibsfGf59j2VwB6wlcOkjvwyn8%3D',
+      oauth_signature: '5Cltv9y0u%2FCqa5HXf0NdDljCmD4%3D',
       oauth_signature_method: 'HMAC-SHA1',
       oauth_timestamp: '1555555555',
       oauth_token: 'a_token',
-      oauth_version: '1.0A'
+      oauth_version: '1.0A',
+      realm: 'a_realm'
     });
   });
 });
