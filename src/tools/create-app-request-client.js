@@ -13,6 +13,7 @@ const addQueryParams = require('../http-middlewares/before/add-query-params');
 const addBasicAuthHeader = require('../http-middlewares/before/add-basic-auth-header');
 const addDigestAuthHeader = require('../http-middlewares/before/add-digest-auth-header');
 const disableSSLCertCheck = require('../http-middlewares/before/disable-ssl-cert-check');
+const oauth1SignRequest = require('../http-middlewares/before/oauth1-sign-request');
 
 // after middles
 const prepareResponse = require('../http-middlewares/after/prepare-response');
@@ -38,6 +39,8 @@ const createAppRequestClient = (input, options) => {
       httpBefores.push(addBasicAuthHeader);
     } else if (app.authentication.type === 'digest') {
       httpBefores.push(addDigestAuthHeader);
+    } else if (app.authentication.type === 'oauth1') {
+      httpBefores.push(oauth1SignRequest);
     }
   }
 

@@ -1,5 +1,7 @@
 'use strict';
 
+const querystring = require('querystring');
+
 const _ = require('lodash');
 
 const injectInput = require('./http-middlewares/before/inject-input');
@@ -17,7 +19,13 @@ const executeHttpRequest = (input, options) => {
   return input.z
     .request(options)
     .then(throwForStatus)
-    .then(resp => createJSONtool().parse(resp.content));
+    .then(resp => {
+      try {
+        return createJSONtool().parse(resp.content);
+      } catch (err) {
+        return querystring.parse(resp.content);
+      }
+    });
 };
 
 const executeInputOutputFields = (inputOutputFields, input) => {
