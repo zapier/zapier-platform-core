@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const urllib = require('url');
 const querystring = require('querystring');
 
@@ -20,7 +21,9 @@ const collectAuthParams = req => {
   ]);
   _.defaults(params, {
     oauth_version: '1.0A',
-    oauth_signature_method: 'HMAC-SHA1'
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_nonce: crypto.randomBytes(20).toString('hex'),
+    oauth_timestamp: Math.floor(Date.now() / 1000)
   });
   return params;
 };
