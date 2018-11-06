@@ -4,7 +4,7 @@ const urllib = require('url');
 const fetch = require('node-fetch');
 
 const { NotImplementedError } = require('../../errors');
-const { md5 } = require('../../tools/data');
+const { md5 } = require('../../tools/hashing');
 
 // This function splits a comma-separated string described by RFC 2068 Section 2.
 // Ported from https://github.com/python/cpython/blob/f081fd83/Lib/urllib/request.py#L1399-L1440

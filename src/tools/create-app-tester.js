@@ -4,7 +4,7 @@ const createLambdaHandler = require('./create-lambda-handler');
 const resolveMethodPath = require('./resolve-method-path');
 const ZapierPromise = require('./promise');
 const { get } = require('lodash');
-const { md5 } = require('./data');
+const { genId } = require('./data');
 
 // this is (annoyingly) mirrored in cli/api_base, so that test functions only
 // have a storeKey when canPaginate is true. otherwise, a test would work but a
@@ -40,20 +40,21 @@ const createAppTester = appRaw => {
   const handler = createLambdaHandler(appRaw);
   const createHandlerPromise = promisifyHandler(handler);
 
+  const randomSeed = genId();
+
   return (methodOrFunc, bundle) => {
     bundle = bundle || {};
 
     const method = resolveMethodPath(appRaw, methodOrFunc);
 
-    // we need a value that's unique to this test (but consistent across test runs) so we don't lose cursors
-    const username = process.env.USER || process.env.USERNAME || 'fallback';
-    const unique = md5(`${method}-${username}`);
-
     const event = {
       command: 'execute',
       method,
       bundle,
-      storeKey: shouldPaginate(appRaw, method) ? `testKey-${unique}` : null
+      storeKey: shouldPaginate(appRaw, method)
+        ? // this key will be consistent across runs but unique to each test so we don't lose cursors
+          `testKey-${method}-${randomSeed}`
+        : null
     };
 
     if (process.env.LOG_TO_STDOUT) {
