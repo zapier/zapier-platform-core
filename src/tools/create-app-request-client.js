@@ -2,22 +2,23 @@
 
 const _ = require('lodash');
 
-const ensurePath = require('./ensure-path');
-const ensureArray = require('./ensure-array');
 const createRequestClient = require('./create-request-client');
+const ensureArray = require('./ensure-array');
+const ensurePath = require('./ensure-path');
 
 // before middles
-const createInjectInputMiddleware = require('../http-middlewares/before/inject-input');
-const prepareRequest = require('../http-middlewares/before/prepare-request');
-const addQueryParams = require('../http-middlewares/before/add-query-params');
 const addBasicAuthHeader = require('../http-middlewares/before/add-basic-auth-header');
 const addDigestAuthHeader = require('../http-middlewares/before/add-digest-auth-header');
+const addQueryParams = require('../http-middlewares/before/add-query-params');
+const createInjectInputMiddleware = require('../http-middlewares/before/inject-input');
 const disableSSLCertCheck = require('../http-middlewares/before/disable-ssl-cert-check');
 const oauth1SignRequest = require('../http-middlewares/before/oauth1-sign-request');
+const prepareRequest = require('../http-middlewares/before/prepare-request');
 
 // after middles
-const prepareResponse = require('../http-middlewares/after/prepare-response');
+const formBodyToJson = require('../http-middlewares/after/form-body-to-json');
 const logResponse = require('../http-middlewares/after/log-response');
+const prepareResponse = require('../http-middlewares/after/prepare-response');
 const throwForStaleAuth = require('../http-middlewares/after/throw-for-stale-auth');
 
 const createAppRequestClient = (input, options) => {
@@ -60,6 +61,10 @@ const createAppRequestClient = (input, options) => {
         _.get(app, 'authentication.oauth2Config.autoRefresh'))
     ) {
       httpOriginalAfters.push(throwForStaleAuth);
+    } else if (app.authentication.type === 'oauth1') {
+      // OAuth1 tokens are encoded in form body, let's re-encode it to JSON, so
+      // executeHttpRequest can still expect JSON
+      httpOriginalAfters.push(formBodyToJson);
     }
   }
 
