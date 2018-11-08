@@ -1,18 +1,12 @@
 'use strict';
 
-const crypto = require('crypto');
 const urllib = require('url');
 
 const fetch = require('node-fetch');
 
 const parseDictHeader = require('../../tools/parse-dict-header');
 const { NotImplementedError } = require('../../errors');
-
-const md5 = s =>
-  crypto
-    .createHash('md5')
-    .update(s)
-    .digest('hex');
+const { md5 } = require('../../tools/hashing');
 
 const buildDigestHeader = (username, password, url, method, creds) => {
   if (creds.algorithm && creds.algorithm.toUpperCase() !== 'MD5') {
