@@ -466,7 +466,7 @@ const EnvironmentVariable = {
       }
     }
   }
-
+};
 const ExecuteCallbackRequest = {
   key: 'executeCallbackRequest',
   noun: 'Callback',
@@ -551,7 +551,7 @@ const App = {
     [HonkerDonker.key]: HonkerDonker,
     [ExecuteRequestAsFunc.key]: ExecuteRequestAsFunc,
     [ExecuteRequestAsShorthand.key]: ExecuteRequestAsShorthand,
-    [ExecuteCallbackRequest.key]: ExecuteCallbackRequest
+    [ExecuteCallbackRequest.key]: ExecuteCallbackRequest,
     [EnvironmentVariable.key]: EnvironmentVariable
   },
   hydrators: {
