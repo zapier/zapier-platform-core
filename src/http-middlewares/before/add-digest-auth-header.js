@@ -4,9 +4,9 @@ const urllib = require('url');
 
 const fetch = require('node-fetch');
 
-const parseDictHeader = require('../../tools/parse-dict-header');
 const { NotImplementedError } = require('../../errors');
 const { md5 } = require('../../tools/hashing');
+const { parseDictHeader } = require('../../tools/http');
 
 const buildDigestHeader = (username, password, url, method, creds) => {
   if (creds.algorithm && creds.algorithm.toUpperCase() !== 'MD5') {

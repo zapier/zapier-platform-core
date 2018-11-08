@@ -8,7 +8,7 @@ const addBasicAuthHeader = require('../src/http-middlewares/before/add-basic-aut
 const prepareResponse = require('../src/http-middlewares/after/prepare-response');
 const applyMiddleware = require('../src/middleware');
 const oauth1SignRequest = require('../src/http-middlewares/before/oauth1-sign-request');
-const parseDictHeader = require('../src/tools/parse-dict-header');
+const { parseDictHeader } = require('../src/tools/http');
 
 describe('http requests', () => {
   it('should support async before middleware', done => {
