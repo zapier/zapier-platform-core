@@ -37,7 +37,7 @@ const createApp = appRaw => {
     checkOutput,
     largeResponseCachePointer,
     waitForPromises,
-    callbackStatusCatcher
+    callbackStatusCatcher,
     ...ensureArray(frozenCompiledApp.afterApp)
   ];
 
