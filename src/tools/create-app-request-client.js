@@ -16,7 +16,6 @@ const oauth1SignRequest = require('../http-middlewares/before/oauth1-sign-reques
 const prepareRequest = require('../http-middlewares/before/prepare-request');
 
 // after middles
-const formBodyToJson = require('../http-middlewares/after/form-body-to-json');
 const logResponse = require('../http-middlewares/after/log-response');
 const prepareResponse = require('../http-middlewares/after/prepare-response');
 const throwForStaleAuth = require('../http-middlewares/after/throw-for-stale-auth');
@@ -61,10 +60,6 @@ const createAppRequestClient = (input, options) => {
         _.get(app, 'authentication.oauth2Config.autoRefresh'))
     ) {
       httpOriginalAfters.push(throwForStaleAuth);
-    } else if (app.authentication.type === 'oauth1') {
-      // OAuth1 tokens are encoded in form body, let's re-encode it to JSON, so
-      // executeHttpRequest can still expect JSON
-      httpOriginalAfters.push(formBodyToJson);
     }
   }
 

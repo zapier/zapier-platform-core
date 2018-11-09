@@ -1,5 +1,7 @@
 'use strict';
 
+const querystring = require('querystring');
+
 const _ = require('lodash');
 
 const injectInput = require('./http-middlewares/before/inject-input');
@@ -14,10 +16,7 @@ const constants = require('./constants');
 
 const executeHttpRequest = (input, options) => {
   options = _.extend({}, options, constants.REQUEST_OBJECT_SHORTHAND_OPTIONS);
-  return input.z
-    .request(options)
-    .then(throwForStatus)
-    .then(resp => createJSONtool().parse(resp.content));
+  return input.z.request(options).then(throwForStatus);
 };
 
 const executeInputOutputFields = (inputOutputFields, input) => {
@@ -46,8 +45,13 @@ const executeCallbackMethod = (z, bundle, method) => {
 
 const isInputOutputFields = methodName =>
   methodName.match(/\.(inputFields|outputFields)$/);
+
 const isRenderOnly = methodName =>
   _.indexOf(constants.RENDER_ONLY_METHODS, methodName) >= 0;
+
+const isOAuth1TokenMethod = (app, methodName) =>
+  methodName.match(/\.(getRequestToken|getAccessToken)$/) &&
+  _.get(app, 'authentication.type') === 'oauth1';
 
 const execute = (app, input) => {
   const z = input.z;
@@ -78,7 +82,14 @@ const execute = (app, input) => {
       const preparedRequest = addQueryParams(prepareRequest(requestWithInput));
       return preparedRequest.url;
     }
-    return executeHttpRequest(input, options);
+
+    const responsePromise = executeHttpRequest(input, options);
+    if (isOAuth1TokenMethod(app, methodName)) {
+      // We expect the response body returned by OAuth1 getRequestToken and
+      // getAccessToken is form-urlencoded
+      return responsePromise.then(res => querystring.parse(res.content));
+    }
+    return responsePromise.then(resp => createJSONtool().parse(resp.content));
   } else {
     throw new Error(
       `Error: Could not find the method to call: ${input._zapier.event.method}`
