@@ -40,10 +40,6 @@ describe('callbackStatusCatcher', () => {
       input._zapier.event.callbackUsed = true;
       result = callbackStatusCatcher(output);
     });
-    it('should turn result into an envelope', () => {
-      console.log(result);
-      result.__type.should.eql('OutputEnvelope');
-    });
     it('should set callback flag on envelope', () =>
       result.status.should.be.eql('CALLBACK'));
   });
