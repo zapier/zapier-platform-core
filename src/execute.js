@@ -4,19 +4,28 @@ const querystring = require('querystring');
 
 const _ = require('lodash');
 
-const injectInput = require('./http-middlewares/before/inject-input');
-const prepareRequest = require('./http-middlewares/before/prepare-request');
 const addQueryParams = require('./http-middlewares/before/add-query-params');
-const throwForStatus = require('./http-middlewares/after/throw-for-status');
 const createJSONtool = require('./tools/create-json-tool');
 const ensureArray = require('./tools/ensure-array');
+const injectInput = require('./http-middlewares/before/inject-input');
+const prepareRequest = require('./http-middlewares/before/prepare-request');
+const throwForStatus = require('./http-middlewares/after/throw-for-status');
 const ZapierPromise = require('./tools/promise');
+const { FORM_TYPE } = require('./tools/http');
 
 const constants = require('./constants');
 
 const executeHttpRequest = (input, options) => {
   options = _.extend({}, options, constants.REQUEST_OBJECT_SHORTHAND_OPTIONS);
-  return input.z.request(options).then(throwForStatus);
+  return input.z
+    .request(options)
+    .then(throwForStatus)
+    .then(resp => {
+      if (resp.headers.get('content-type') === FORM_TYPE) {
+        return querystring.parse(resp.content);
+      }
+      return createJSONtool().parse(resp.content);
+    });
 };
 
 const executeInputOutputFields = (inputOutputFields, input) => {
@@ -49,10 +58,6 @@ const isInputOutputFields = methodName =>
 const isRenderOnly = methodName =>
   _.indexOf(constants.RENDER_ONLY_METHODS, methodName) >= 0;
 
-const isOAuth1TokenMethod = (app, methodName) =>
-  methodName.match(/\.(getRequestToken|getAccessToken)$/) &&
-  _.get(app, 'authentication.type') === 'oauth1';
-
 const execute = (app, input) => {
   const z = input.z;
   const methodName = input._zapier.event.method;
@@ -82,14 +87,7 @@ const execute = (app, input) => {
       const preparedRequest = addQueryParams(prepareRequest(requestWithInput));
       return preparedRequest.url;
     }
-
-    const responsePromise = executeHttpRequest(input, options);
-    if (isOAuth1TokenMethod(app, methodName)) {
-      // We expect the response body returned by OAuth1 getRequestToken and
-      // getAccessToken is form-urlencoded
-      return responsePromise.then(res => querystring.parse(res.content));
-    }
-    return responsePromise.then(resp => createJSONtool().parse(resp.content));
+    return executeHttpRequest(input, options);
   } else {
     throw new Error(
       `Error: Could not find the method to call: ${input._zapier.event.method}`
