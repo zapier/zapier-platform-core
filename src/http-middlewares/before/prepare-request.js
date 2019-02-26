@@ -99,6 +99,7 @@ const finalRequest = req => {
 const prepareRequest = function(req) {
   const input = req.input || {};
 
+  // We will want to use _.defeaultsDeep if one of these nested values ever defaults to true.
   req = _.defaults(req, {
     merge: true,
     removeMissingValuesFrom: {
