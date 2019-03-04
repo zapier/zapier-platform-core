@@ -122,7 +122,8 @@ const prepareRequest = function(req) {
   if (req.replace) {
     const bank = cleaner.createBundleBank(
       input._zapier.app,
-      input._zapier.event
+      input._zapier.event,
+      { preserve: { 'bundle.inputData': true } }
     );
     req = cleaner.recurseReplaceBank(req, bank);
   }

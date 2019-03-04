@@ -88,7 +88,7 @@ const finalizeBundle = pipe(
 );
 
 // Takes a raw app and bundle and composes a bank of {{key}}->val
-const createBundleBank = (appRaw, event = {}) => {
+const createBundleBank = (appRaw, event = {}, flattenOptions) => {
   const bank = {
     bundle: finalizeBundle(event.bundle),
     process: {
@@ -96,7 +96,7 @@ const createBundleBank = (appRaw, event = {}) => {
     }
   };
 
-  const flattenedBank = flattenPaths(bank);
+  const flattenedBank = flattenPaths(bank, flattenOptions);
   return Object.keys(flattenedBank).reduce((coll, key) => {
     coll[`{{${key}}}`] = flattenedBank[key];
     return coll;
