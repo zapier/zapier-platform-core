@@ -5,6 +5,7 @@ const _ = require('lodash');
 const cleaner = require('./cleaner');
 const dataTools = require('./data');
 const schemaTools = require('./schema-tools');
+const resolveVersion = require('./schema-mismatch');
 const zapierSchema = require('zapier-platform-schema');
 
 const isVisible = action => !_.get(action, ['display', 'hidden']);
@@ -170,16 +171,20 @@ const serializeApp = compiledApp => {
   return dataTools.jsonCopy(cleanedApp);
 };
 
-const validateApp = compiledApp => {
-  const cleanedApp = cleaner.recurseCleanFuncs(compiledApp);
-  const results = zapierSchema.validateAppDefinition(cleanedApp);
-  return dataTools.jsonCopy(results.errors);
-};
+const getErrors = validation => dataTools.jsonCopy(validation.errors);
 
-const prepareApp = appRaw => {
-  const compiledApp = compileApp(appRaw);
-  return dataTools.deepFreeze(compiledApp);
-};
+const validateApp = _.flow(
+  cleaner.recurseCleanFuncs,
+  zapierSchema.validateAppDefinition,
+  getErrors
+);
+
+// prettier-ignore
+const prepareApp = _.flow(
+  compileApp,
+  resolveVersion,
+  dataTools.deepFreeze
+);
 
 module.exports = {
   compileApp,

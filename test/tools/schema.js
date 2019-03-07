@@ -1,10 +1,109 @@
 'use strict';
 
-require('should');
-
+const should = require('should');
 const schema = require('../../src/tools/schema');
 
 describe('schema', () => {
+  describe.only('handles version mismatches', () => {
+    describe('version 8.0.0', () => {
+      it('makes no changes if the app is set to the current version', () => {
+        const appRaw = {
+          platformVersion: '8.0.0',
+          version: '8.0.0',
+          triggers: {
+            fastFoo: {
+              key: 'fastFoo',
+              noun: 'Foo',
+              display: {
+                label: 'Fast Foo',
+                description: 'A foo but faster'
+              },
+              operation: {
+                perform: {
+                  url: 'https://api.example.com'
+                }
+              }
+            }
+          },
+          creates: {},
+          searches: {},
+          searchOrCreates: {}
+        };
+
+        const preparedApp = schema.prepareApp(appRaw);
+        preparedApp.should.eql(appRaw);
+
+        const errors = schema.validateApp(appRaw);
+        errors.should.eql([]);
+      });
+
+      it('sets removeMissingValuesFrom based on omitEmptyParams', () => {
+        const appRaw = {
+          platformVersion: '7.6.1',
+          version: '7.6.1',
+          triggers: {
+            fastFoo: {
+              key: 'fastFoo',
+              noun: 'Foo',
+              display: {
+                label: 'Fast Foo',
+                description: 'A foo but faster'
+              },
+              operation: {
+                perform: {
+                  url: 'https://api.example.com',
+                  omitEmptyParams: true
+                }
+              }
+            }
+          }
+        };
+
+        const preparedApp = schema.prepareApp(appRaw);
+        const { perform } = preparedApp.triggers.fastFoo.operation;
+        should(perform.omitEmptyParams).eql(undefined);
+        perform.removeMissingValuesFrom.should.eql({ params: true });
+
+        const rawErrors = schema.validateApp(appRaw);
+        rawErrors.should.have.length(1);
+
+        const preparedErrors = schema.validateApp(preparedApp);
+        preparedErrors.should.eql([]);
+      });
+
+      it('does nothing if omitEmptyParams is not included', () => {
+        const appRaw = {
+          platformVersion: '7.6.1',
+          version: '7.6.1',
+          triggers: {
+            fastFoo: {
+              key: 'fastFoo',
+              noun: 'Foo',
+              display: {
+                label: 'Fast Foo',
+                description: 'A foo but faster'
+              },
+              operation: {
+                perform: {
+                  url: 'https://api.example.com'
+                }
+              }
+            }
+          },
+          creates: {},
+          searches: {},
+          searchOrCreates: {}
+        };
+
+        const preparedApp = schema.prepareApp(appRaw);
+        preparedApp.should.eql(appRaw);
+
+        const preparedErrors = schema.validateApp(preparedApp);
+        preparedErrors.should.eql([]);
+      });
+    });
+  });
+
   describe('compileApp on a resource', () => {
     it('should handle blank methods', () => {
       const appRaw = {
