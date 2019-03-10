@@ -10,6 +10,7 @@ const createStoreKeyTool = require('../../tools/create-storekey-tool');
 const createCallbackHigherOrderFunction = require('../../tools/create-callback-wrapper');
 const createLegacyScriptingRunner = require('../../tools/create-legacy-scripting-runner');
 const createLoggerConsole = require('../../tools/create-logger-console');
+const createRequire = require('../../tools/create-require');
 const errors = require('../../errors');
 const hashing = require('../../tools/hashing');
 
@@ -20,14 +21,15 @@ const injectZObject = input => {
   const bundle = _.get(input, '_zapier.event.bundle', {});
   const zRoot = {
     console: createLoggerConsole(input),
-    JSON: createJSONtool(),
-    hash: hashing.hashify,
+    cursor: createStoreKeyTool(input),
     dehydrate: createDehydrator(input, 'method'),
     dehydrateFile: createDehydrator(input, 'file'),
-    stashFile: createFileStasher(input),
-    cursor: createStoreKeyTool(input),
+    errors,
     generateCallbackUrl: createCallbackHigherOrderFunction(input),
-    errors
+    hash: hashing.hashify,
+    JSON: createJSONtool(),
+    require: createRequire(),
+    stashFile: createFileStasher(input)
   };
 
   let zSkinny = _.extend({}, zRoot);

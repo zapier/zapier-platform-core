@@ -530,4 +530,172 @@ describe('create-app', () => {
     it('returns the methods values', () =>
       results.results.should.eql({ callbackUrl: 'calback_url' }));
   });
+
+  describe('using require', () => {
+    const createDefinition = source => ({
+      triggers: {
+        testRequire: {
+          display: {
+            label: 'Test Require',
+            description: 'Put zRequire through the ringer'
+          },
+          key: 'testRequire',
+          operation: {
+            perform: {
+              source
+            }
+          }
+        }
+      }
+    });
+
+    it('should throw a require error', async () => {
+      const definition = createDefinition(`
+        const crypto = require('crypto');
+        return crypto.createHash('md5').update('abc').digest('hex');
+      `);
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appFail = createApp(definition);
+
+      try {
+        await appFail(input);
+      } catch (error) {
+        error.name.should.eql('RequireModuleError');
+        error.message.should.eql(
+          [
+            "Node's module system is not in scope. Use z.require() instead.",
+            'What happened:',
+            '  Executing triggers.testRequire.operation.perform with bundle',
+            "  Node's module system is not in scope. Use z.require() instead."
+          ].join('\n')
+        );
+      }
+    });
+
+    it('should import and use the crypto module from node', async () => {
+      const definition = createDefinition(`
+        const crypto = z.require('crypto');
+        return crypto.createHash('md5').update('abc').digest('hex');
+      `);
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appPass = createApp(definition);
+      const { results } = await appPass(input);
+      results.should.eql('900150983cd24fb0d6963f7d28e17f72');
+    });
+
+    it('should allow approved libs used in core to be accessed', async () => {
+      const definition = createDefinition(`
+        const _ = z.require('lodash');
+        return _.capitalize('a capital day.');
+      `);
+
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appPass = createApp(definition);
+      const { results } = await appPass(input);
+      results.should.eql('A capital day.');
+    });
+
+    it('should throw for disallowed modules', async () => {
+      const definition = createDefinition(`
+        const fs = z.require('fs');
+        return fs.writeFileSync('evil', 'doBadStuff()');
+      `);
+
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appFail = createApp(definition);
+
+      try {
+        await appFail(input);
+      } catch (error) {
+        error.name.should.eql('RequireModuleError');
+        error.message.should.eql(
+          [
+            'You are attempting to use a disallowed module: "fs"',
+            'What happened:',
+            '  Executing triggers.testRequire.operation.perform with bundle',
+            '  You are attempting to use a disallowed module: "fs"'
+          ].join('\n')
+        );
+      }
+    });
+
+    it('should throw for disallowed standard node modules', async () => {
+      const definition = createDefinition(`
+        const fs = z.require('fs');
+        return fs.writeFileSync('evil', 'doBadStuff()');
+      `);
+
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appFail = createApp(definition);
+
+      try {
+        await appFail(input);
+      } catch (error) {
+        error.name.should.eql('RequireModuleError');
+        error.message.should.eql(
+          [
+            'You are attempting to use a disallowed module: "fs"',
+            'What happened:',
+            '  Executing triggers.testRequire.operation.perform with bundle',
+            '  You are attempting to use a disallowed module: "fs"'
+          ].join('\n')
+        );
+      }
+    });
+
+    it('should throw for disallowed platform-core node_modules', async () => {
+      const definition = createDefinition(`
+        const AWS = z.require('aws-sdk');
+        return AWS.questionableIntent();
+      `);
+
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appFail = createApp(definition);
+
+      try {
+        await appFail(input);
+      } catch (error) {
+        error.name.should.eql('RequireModuleError');
+        error.message.should.eql(
+          [
+            'You are attempting to use a disallowed module: "aws-sdk"',
+            'What happened:',
+            '  Executing triggers.testRequire.operation.perform with bundle',
+            '  You are attempting to use a disallowed module: "aws-sdk"'
+          ].join('\n')
+        );
+      }
+    });
+
+    it('should handle require errors', async () => {
+      const definition = createDefinition(`
+        const moment = z.require('moment');
+        return moment(new Date).format(YYYY-MM-DD);
+      `);
+
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appFail = createApp(definition);
+
+      try {
+        await appFail(input);
+      } catch (error) {
+        error.name.should.eql('Error');
+        error.message.should.eql(
+          [
+            "Cannot find module 'moment'",
+            'What happened:',
+            '  Executing triggers.testRequire.operation.perform with bundle',
+            "  Cannot find module 'moment'"
+          ].join('\n')
+        );
+      }
+    });
+  });
 });
