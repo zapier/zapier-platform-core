@@ -564,10 +564,10 @@ describe('create-app', () => {
         error.name.should.eql('RequireModuleError');
         error.message.should.eql(
           [
-            "Node's module system is not in scope. Use z.require() instead.",
+            'For technical reasons, use z.require() instead of require().',
             'What happened:',
             '  Executing triggers.testRequire.operation.perform with bundle',
-            "  Node's module system is not in scope. Use z.require() instead."
+            '  For technical reasons, use z.require() instead of require().'
           ].join('\n')
         );
       }
@@ -583,94 +583,6 @@ describe('create-app', () => {
       const appPass = createApp(definition);
       const { results } = await appPass(input);
       results.should.eql('900150983cd24fb0d6963f7d28e17f72');
-    });
-
-    it('should allow approved libs used in core to be accessed', async () => {
-      const definition = createDefinition(`
-        const _ = z.require('lodash');
-        return _.capitalize('a capital day.');
-      `);
-
-      const input = createTestInput('triggers.testRequire.operation.perform');
-
-      const appPass = createApp(definition);
-      const { results } = await appPass(input);
-      results.should.eql('A capital day.');
-    });
-
-    it('should throw for disallowed modules', async () => {
-      const definition = createDefinition(`
-        const fs = z.require('fs');
-        return fs.writeFileSync('evil', 'doBadStuff()');
-      `);
-
-      const input = createTestInput('triggers.testRequire.operation.perform');
-
-      const appFail = createApp(definition);
-
-      try {
-        await appFail(input);
-      } catch (error) {
-        error.name.should.eql('RequireModuleError');
-        error.message.should.eql(
-          [
-            'You are attempting to use a disallowed module: "fs"',
-            'What happened:',
-            '  Executing triggers.testRequire.operation.perform with bundle',
-            '  You are attempting to use a disallowed module: "fs"'
-          ].join('\n')
-        );
-      }
-    });
-
-    it('should throw for disallowed standard node modules', async () => {
-      const definition = createDefinition(`
-        const fs = z.require('fs');
-        return fs.writeFileSync('evil', 'doBadStuff()');
-      `);
-
-      const input = createTestInput('triggers.testRequire.operation.perform');
-
-      const appFail = createApp(definition);
-
-      try {
-        await appFail(input);
-      } catch (error) {
-        error.name.should.eql('RequireModuleError');
-        error.message.should.eql(
-          [
-            'You are attempting to use a disallowed module: "fs"',
-            'What happened:',
-            '  Executing triggers.testRequire.operation.perform with bundle',
-            '  You are attempting to use a disallowed module: "fs"'
-          ].join('\n')
-        );
-      }
-    });
-
-    it('should throw for disallowed platform-core node_modules', async () => {
-      const definition = createDefinition(`
-        const AWS = z.require('aws-sdk');
-        return AWS.questionableIntent();
-      `);
-
-      const input = createTestInput('triggers.testRequire.operation.perform');
-
-      const appFail = createApp(definition);
-
-      try {
-        await appFail(input);
-      } catch (error) {
-        error.name.should.eql('RequireModuleError');
-        error.message.should.eql(
-          [
-            'You are attempting to use a disallowed module: "aws-sdk"',
-            'What happened:',
-            '  Executing triggers.testRequire.operation.perform with bundle',
-            '  You are attempting to use a disallowed module: "aws-sdk"'
-          ].join('\n')
-        );
-      }
     });
 
     it('should handle require errors', async () => {

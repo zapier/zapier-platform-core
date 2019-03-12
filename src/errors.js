@@ -39,15 +39,16 @@ const exceptions = _.reduce(
 const isRequireError = ({ name, message }) =>
   name === 'ReferenceError' && message === 'require is not defined';
 
-const handleError = err => {
+const handleError = (...args) => {
+  const [error] = args;
   const { RequireModuleError } = exceptions;
-  if (isRequireError(err)) {
+  if (isRequireError(error)) {
     throw new RequireModuleError(
-      "Node's module system is not in scope. Use z.require() instead."
+      'For technical reasons, use z.require() instead of require().'
     );
   }
 
-  throw err;
+  throw error;
 };
 
 module.exports = {
