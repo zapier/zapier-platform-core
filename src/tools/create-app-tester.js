@@ -50,7 +50,7 @@ const createAppTester = (appRaw, customStoreKey) => {
     ? customStoreKey
       ? `testKey-${customStoreKey}`
       : `testKey-${method}-${randomSeed}`
-    : undefined;
+    : null;
 
     const event = {
       command: 'execute',
