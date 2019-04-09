@@ -81,11 +81,7 @@ const doTest = runner => {
     it('should return data from app function call', () => {
       const event = {
         command: 'execute',
-        method: 'resources.list.list.operation.perform',
-        bundle: {
-          'param a': 'say, can u see me?',
-          'param b': 'oh, can u see me too?'
-        }
+        method: 'resources.list.list.operation.perform'
       };
       return runner(event).then(response => {
         should.exist(response.results);
@@ -124,27 +120,41 @@ const doTest = runner => {
       });
     });
 
+    const simpleOverride = {
+      resources: {
+        foo: {
+          key: 'foo',
+          noun: 'Foo',
+          list: {
+            display: {},
+            operation: {
+              perform: { source: 'return [{id: 45678}]' }
+            }
+          }
+        }
+      }
+    };
+
     it('should handle appRawOverride', () => {
       const event = {
         command: 'execute',
         method: 'triggers.fooList.operation.perform',
-        appRawOverride: {
-          resources: {
-            foo: {
-              key: 'foo',
-              noun: 'Foo',
-              list: {
-                display: {},
-                operation: {
-                  perform: { source: 'return [{id: 45678}]' }
-                }
-              }
-            }
-          }
-        }
+        appRawOverride: simpleOverride
       };
       return runner(event).then(response => {
         response.results.should.deepEqual([{ id: 45678 }]);
+      });
+    });
+
+    it.only('should return data from predefined app function call even when appRawOverride is provided', () => {
+      const event = {
+        command: 'execute',
+        method: 'resources.list.list.operation.perform',
+        appRawOverride: simpleOverride
+      };
+      return runner(event).then(response => {
+        should.exist(response.results);
+        response.results.should.eql([{ id: 1234 }, { id: 5678 }]);
       });
     });
 
