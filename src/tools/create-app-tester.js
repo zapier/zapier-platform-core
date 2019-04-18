@@ -36,8 +36,8 @@ const promisifyHandler = handler => {
 };
 
 // A shorthand compatible wrapper for testing.
-const createAppTester = (appRaw, customStoreKey) => {
-  const handler = createLambdaHandler(appRaw);
+const createAppTester = (appRaw, { customStoreKey, skipHttpPatch } = {}) => {
+  const handler = createLambdaHandler(appRaw, { skipHttpPatch });
   const createHandlerPromise = promisifyHandler(handler);
 
   const randomSeed = genId();
