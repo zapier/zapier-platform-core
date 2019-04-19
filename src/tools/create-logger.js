@@ -87,6 +87,7 @@ const makeSensitiveBank = (event, data) => {
         const censored = hashing.snipify(val);
         bank[val] = censored;
         bank[encodeURIComponent(val)] = censored;
+        bank[Buffer.from(val).toString('base64')] = censored;
       }
       return bank;
     },

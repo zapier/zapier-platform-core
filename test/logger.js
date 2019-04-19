@@ -1,6 +1,6 @@
 'use strict';
 
-require('should');
+const should = require('should');
 const createlogger = require('../src/tools/create-logger');
 const querystring = require('querystring');
 
@@ -73,6 +73,28 @@ describe('logger', () => {
           key: ':censored:6:8f63f9ff57:'
         }
       });
+    });
+  });
+
+  it('should censor auth headers', () => {
+    const bundle = {
+      authData: {
+        key: 'verysecret'
+      },
+      headers: {
+        AuthorizationPlain: 'basic verysecret',
+        AuthorizationEncoded: 'basic dmVyeXNlY3JldA=='
+      }
+    };
+    const logger = createlogger({ bundle }, options);
+
+    const data = bundle.authData;
+
+    return logger(bundle.headers, data).then(response => {
+      response.status.should.eql(200);
+      const j = response.content.json;
+      should(j.message.AuthorizationPlain.includes('censored')).eql(true);
+      should(j.message.AuthorizationEncoded.includes('censored')).eql(true);
     });
   });
 
