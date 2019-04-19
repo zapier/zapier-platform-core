@@ -14,7 +14,7 @@ const truncate = str => dataTools.simpleTruncate(str, 3500, ' [...]');
 const formatHeaders = (headers = {}) => {
   if (_.isString(headers)) {
     // we had a bug where headers coming in as strings weren't getting censored. If something calls this with stringified headers, we'll bow out. Pass the raw object instead.
-    return 'WARNING: possibly uncesored headers';
+    return 'ERR - refusing to log possibly uncesored headers';
   }
   return Object.entries(headers)
     .map(([header, value]) => {
