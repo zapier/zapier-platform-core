@@ -1,6 +1,6 @@
 'use strict';
 
-const should = require('should');
+require('should');
 const createlogger = require('../src/tools/create-logger');
 const querystring = require('querystring');
 
@@ -76,25 +76,55 @@ describe('logger', () => {
     });
   });
 
-  it('should censor auth headers', () => {
+  it.only('should censor auth headers', () => {
     const bundle = {
       authData: {
         key: 'verysecret'
       },
       headers: {
-        AuthorizationPlain: 'basic verysecret',
-        AuthorizationEncoded: 'basic dmVyeXNlY3JldA=='
+        request_headers: {
+          authorization: 'basic dmVyeXNlY3JldA=='
+        },
+        response_headers: {
+          Authorization: 'basic OnZlcnlzZWNyZXRwbGVhc2U='
+        }
       }
     };
     const logger = createlogger({ bundle }, options);
 
-    const data = bundle.authData;
-
-    return logger(bundle.headers, data).then(response => {
+    return logger('123 from url google.com', bundle.headers).then(response => {
       response.status.should.eql(200);
       const j = response.content.json;
-      should(j.message.AuthorizationPlain.includes('censored')).eql(true);
-      should(j.message.AuthorizationEncoded.includes('censored')).eql(true);
+      j.data.request_headers.should.eql(
+        'authorization: basic :censored:10:d98440830f:'
+      );
+      j.data.response_headers.should.eql(
+        'Authorization: :censored:30:f914b1b0d1:'
+      );
+    });
+  });
+
+  it.only('should refuse to log headers that arrived as strings', () => {
+    const bundle = {
+      authData: {
+        key: 'verysecret'
+      },
+      headers: {
+        request_headers: 'authorization: basic dmVyeXNlY3JldA==',
+        response_headers: 'authorization: basic dmVyeXNlY3JldA=='
+      }
+    };
+    const logger = createlogger({ bundle }, options);
+
+    return logger('123 from url google.com', bundle.headers).then(response => {
+      response.status.should.eql(200);
+      const j = response.content.json;
+      j.data.request_headers.should.eql(
+        'ERR - refusing to log possibly uncesored headers'
+      );
+      j.data.response_headers.should.eql(
+        'ERR - refusing to log possibly uncesored headers'
+      );
     });
   });
 

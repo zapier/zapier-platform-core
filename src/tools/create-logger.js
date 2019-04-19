@@ -11,6 +11,18 @@ const constants = require('../constants');
 
 const truncate = str => dataTools.simpleTruncate(str, 3500, ' [...]');
 
+const formatHeaders = (headers = {}) => {
+  if (_.isString(headers)) {
+    // we had a bug where headers coming in as strings weren't getting censored. If something calls this with stringified headers, we'll bow out. Pass the raw object instead.
+    return 'WARNING: possibly uncesored headers';
+  }
+  return Object.entries(headers)
+    .map(([header, value]) => {
+      return `${header}: ${value}`;
+    })
+    .join('\n');
+};
+
 // format HTTP request details into string suitable for printing to stdout
 const httpDetailsLogMessage = data => {
   if (data.log_type !== 'http') {
@@ -115,6 +127,9 @@ const sendLog = (options, event, message, data) => {
       safeData[key] = unsafeData[key];
     }
   });
+
+  safeData.request_headers = formatHeaders(safeData.request_headers);
+  safeData.response_headers = formatHeaders(safeData.response_headers);
 
   const body = {
     message: safeMessage,
