@@ -8,19 +8,31 @@ const dataTools = require('./data');
 const hashing = require('./hashing');
 const ZapierPromise = require('./promise');
 const constants = require('../constants');
+const { unheader } = require('./http');
 
 const truncate = str => dataTools.simpleTruncate(str, 3500, ' [...]');
 
 const formatHeaders = (headers = {}) => {
+  if (_.isEmpty(headers)) {
+    return undefined;
+  }
   if (_.isString(headers)) {
     // we had a bug where headers coming in as strings weren't getting censored. If something calls this with stringified headers, we'll bow out. Pass the raw object instead.
-    return 'ERR - refusing to log possibly uncesored headers';
+    return 'ERR - refusing to log possibly uncensored headers';
   }
-  return Object.entries(headers)
+
+  return Object.entries(unheader(headers))
     .map(([header, value]) => {
       return `${header}: ${value}`;
     })
     .join('\n');
+};
+
+const maybeStringify = d => {
+  if (_.isPlainObject(d) || Array.isArray(d)) {
+    return JSON.stringify(d);
+  }
+  return d;
 };
 
 // format HTTP request details into string suitable for printing to stdout
@@ -49,15 +61,15 @@ const httpDetailsLogMessage = data => {
 ${trimmedData.request_method || 'GET'} ${
     trimmedData.request_url
   }${trimmedData.request_params || ''}
-${trimmedData.request_headers || ''}
+${formatHeaders(trimmedData.request_headers) || ''}
 
-${trimmedData.request_data || ''}
+${maybeStringify(trimmedData.request_data) || ''}
 
 ${trimmedData.response_status_code || 0}
 
-${trimmedData.response_headers || ''}
+${formatHeaders(trimmedData.response_headers) || ''}
 
-${trimmedData.response_content || ''}
+${maybeStringify(trimmedData.response_content) || ''}
 `.trim();
 };
 
@@ -110,6 +122,9 @@ const makeSensitiveBank = (event, data) => {
 const sendLog = (options, event, message, data) => {
   data = _.extend({}, data || {}, event.logExtra || {});
   data.log_type = data.log_type || 'console';
+
+  data.request_headers = unheader(data.request_headers);
+  data.response_headers = unheader(data.response_headers);
 
   const sensitiveBank = makeSensitiveBank(event, data);
   const safeMessage = truncate(
