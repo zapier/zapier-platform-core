@@ -4,7 +4,7 @@ const zapier = require('zapier-platform-core');
 const appPath = path.resolve(__dirname, 'index.js');
 let opts;
 try {
-  opts = require(appPath).appFlags;
+  opts = require(appPath).flags;
 } catch (error) {
   // nothing to see here
 }
