@@ -1,6 +1,6 @@
 // an example app!
 
-process.env.BASE_URL = 'http://zapier-httpbin.herokuapp.com';
+process.env.BASE_URL = 'https://httpbin.org';
 
 const _ = require('lodash');
 const helpers = require('./helpers');
@@ -146,11 +146,9 @@ const RequestSugar = {
     },
     operation: {
       perform: (z /* , bundle */) => {
-        return z
-          .request('http://zapier-httpbin.herokuapp.com/get')
-          .then(resp => {
-            return JSON.parse(resp.content);
-          });
+        return z.request('https://httpbin.org/get').then(resp => {
+          return JSON.parse(resp.content);
+        });
       }
     }
   }
@@ -214,7 +212,7 @@ const FailerHttp = {
     },
     operation: {
       perform: {
-        url: 'http://zapier-httpbin.herokuapp.com/status/403'
+        url: 'https://httpbin.org/status/403'
       }
     }
   }
@@ -440,13 +438,12 @@ const ExecuteRequestAsShorthand = {
       inputFields: [
         {
           key: 'url',
-          default: 'http://zapier-httpbin.herokuapp.com/status/403'
+          default: 'https://httpbin.org/status/403'
         }
       ]
     }
   }
 };
-
 const EnvironmentVariable = {
   key: 'env',
   noun: 'Environment Variable',
@@ -465,6 +462,29 @@ const EnvironmentVariable = {
         });
         return results;
       }
+    }
+  }
+};
+const ExecuteCallbackRequest = {
+  key: 'executeCallbackRequest',
+  noun: 'Callback',
+  list: {
+    display: {
+      label: 'Callback Usage in a perform',
+      description: 'Used for one-offs in the tests.'
+    },
+    operation: {
+      perform: z => {
+        //we need to access the callback url
+        let callbackUrl = z.generateCallbackUrl();
+        return { callbackUrl };
+      },
+      inputFields: [
+        {
+          key: 'test',
+          default: 'Manual Value'
+        }
+      ]
     }
   }
 };
@@ -529,6 +549,7 @@ const App = {
     [HonkerDonker.key]: HonkerDonker,
     [ExecuteRequestAsFunc.key]: ExecuteRequestAsFunc,
     [ExecuteRequestAsShorthand.key]: ExecuteRequestAsShorthand,
+    [ExecuteCallbackRequest.key]: ExecuteCallbackRequest,
     [EnvironmentVariable.key]: EnvironmentVariable
   },
   hydrators: {

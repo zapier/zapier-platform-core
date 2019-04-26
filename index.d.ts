@@ -12,7 +12,8 @@ export const tools: { env: { inject: (filename?: string) => void } };
 
 // see: https://github.com/zapier/zapier-platform-cli/issues/339#issue-336888249
 export const createAppTester: (
-  appRaw: object
+  appRaw: object,
+  options?: { customStoreKey?: string }
 ) => <T extends any, B extends Bundle>(
   func: (z: ZObject, bundle: B) => Promise<T>,
   bundle?: Partial<B> // partial so we don't have to make a full bundle in tests
@@ -36,12 +37,10 @@ export interface Bundle<InputData = { [x: string]: any }> {
   inputData: InputData;
   inputDataRaw: { [x: string]: string };
   meta: {
-    frontend: boolean;
-    prefill: boolean;
-    hydrate: boolean;
-    test_poll: boolean;
-    standard_poll: boolean;
-    first_poll: boolean;
+    isFillingDynamicDropdown: boolean;
+    isLoadingSample: boolean;
+    isPopulatingDedupe: boolean;
+    isTestingAuth: boolean;
     limit: number;
     page: number;
     zap?: { id: string };
@@ -58,6 +57,8 @@ export interface Bundle<InputData = { [x: string]: any }> {
     headers: { [x: string]: string };
     content: { [x: string]: string };
   }> | any;
+  subscribeData?: { id: string };
+  targetUrl?: string;
 }
 
 declare class HaltedError extends Error {}
@@ -66,20 +67,24 @@ declare class RefreshAuthError extends Error {}
 
 // copied http stuff from external typings
 export interface HttpRequestOptions {
-  url?: string;
-  method?: HttpMethod;
+  agent?: Agent;
   body?: string | Buffer | ReadableStream | object;
+  compress?: boolean;
+  follow?: number;
+  form?: object;
   headers?: { [name: string]: string };
   json?: object | any[];
+  method?: HttpMethod;
   params?: object;
-  form?: object;
   raw?: boolean;
   redirect?: 'manual' | 'error' | 'follow';
-  follow?: number;
-  compress?: boolean;
-  agent?: Agent;
-  timeout?: number;
+  removeMissingValuesFrom?: {
+    params?: boolean;
+    body?: boolean;
+  };
   size?: number;
+  timeout?: number;
+  url?: string;
 }
 
 interface BaseHttpResponse {
@@ -126,6 +131,7 @@ export interface ZObject {
     get: () => Promise<string>;
     set: (cursor: string) => Promise<null>;
   };
+  generateCallbackUrl: () => string;
 
   /**
    * turns a file or request into a file into a publicly accessible url

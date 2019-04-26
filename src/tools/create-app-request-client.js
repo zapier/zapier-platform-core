@@ -2,20 +2,22 @@
 
 const _ = require('lodash');
 
-const ensurePath = require('./ensure-path');
-const ensureArray = require('./ensure-array');
 const createRequestClient = require('./create-request-client');
+const ensureArray = require('./ensure-array');
+const ensurePath = require('./ensure-path');
 
 // before middles
-const createInjectInputMiddleware = require('../http-middlewares/before/inject-input');
-const prepareRequest = require('../http-middlewares/before/prepare-request');
-const addQueryParams = require('../http-middlewares/before/add-query-params');
 const addBasicAuthHeader = require('../http-middlewares/before/add-basic-auth-header');
+const addDigestAuthHeader = require('../http-middlewares/before/add-digest-auth-header');
+const addQueryParams = require('../http-middlewares/before/add-query-params');
+const createInjectInputMiddleware = require('../http-middlewares/before/inject-input');
 const disableSSLCertCheck = require('../http-middlewares/before/disable-ssl-cert-check');
+const oauth1SignRequest = require('../http-middlewares/before/oauth1-sign-request');
+const prepareRequest = require('../http-middlewares/before/prepare-request');
 
 // after middles
-const prepareResponse = require('../http-middlewares/after/prepare-response');
 const logResponse = require('../http-middlewares/after/log-response');
+const prepareResponse = require('../http-middlewares/after/prepare-response');
 const throwForStaleAuth = require('../http-middlewares/after/throw-for-stale-auth');
 
 const createAppRequestClient = (input, options) => {
@@ -36,7 +38,9 @@ const createAppRequestClient = (input, options) => {
     if (app.authentication.type === 'basic') {
       httpBefores.push(addBasicAuthHeader);
     } else if (app.authentication.type === 'digest') {
-      console.warn('Digest Auth is not yet available');
+      httpBefores.push(addDigestAuthHeader);
+    } else if (app.authentication.type === 'oauth1') {
+      httpBefores.push(oauth1SignRequest);
     }
   }
 
@@ -51,8 +55,9 @@ const createAppRequestClient = (input, options) => {
 
   if (app.authentication) {
     if (
-      app.authentication.type === 'oauth2' &&
-      _.get(app, 'authentication.oauth2Config.autoRefresh')
+      app.authentication.type === 'session' ||
+      (app.authentication.type === 'oauth2' &&
+        _.get(app, 'authentication.oauth2Config.autoRefresh'))
     ) {
       httpOriginalAfters.push(throwForStaleAuth);
     }

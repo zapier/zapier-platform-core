@@ -2,10 +2,15 @@
 
 require('should');
 const createlogger = require('../src/tools/create-logger');
+const querystring = require('querystring');
+const { Headers } = require('node-fetch');
+const {
+  replaceHeaders
+} = require('../src/http-middlewares/after/middleware-utils');
 
 describe('logger', () => {
   const options = {
-    endpoint: 'http://zapier-httpbin.herokuapp.com/post',
+    endpoint: 'https://httpbin.org/post',
     token: 'fake-token'
   };
 
@@ -75,11 +80,97 @@ describe('logger', () => {
     });
   });
 
+  it('should censor auth headers', () => {
+    const bundle = {
+      authData: {
+        key: 'verysecret'
+      },
+      headers: {
+        request_headers: {
+          authorization: 'basic dmVyeXNlY3JldA=='
+        },
+        response_headers: {
+          Authorization: 'basic OnZlcnlzZWNyZXRwbGVhc2U='
+        }
+      }
+    };
+    const logger = createlogger({ bundle }, options);
+
+    return logger('123 from url google.com', bundle.headers).then(response => {
+      response.status.should.eql(200);
+      const j = response.content.json;
+      j.data.request_headers.should.eql(
+        'authorization: basic :censored:10:d98440830f:'
+      );
+      j.data.response_headers.should.eql(
+        'Authorization: :censored:30:f914b1b0d1:'
+      );
+    });
+  });
+
+  it('should work with header class', () => {
+    const bundle = {
+      authData: {
+        key: 'verysecret'
+      },
+      headers: {
+        request_headers: replaceHeaders({
+          headers: new Headers({
+            authorization: 'basic dmVyeXNlY3JldA=='
+          })
+        }).headers,
+        response_headers: replaceHeaders({
+          headers: new Headers({
+            Authorization: 'basic OnZlcnlzZWNyZXRwbGVhc2U='
+          })
+        }).headers
+      }
+    };
+    const logger = createlogger({ bundle }, options);
+
+    return logger('123 from url google.com', bundle.headers).then(response => {
+      response.status.should.eql(200);
+      const j = response.content.json;
+      j.data.request_headers.should.eql(
+        'authorization: basic :censored:10:d98440830f:'
+      );
+      // Headers class downcases everything
+      j.data.response_headers.should.eql(
+        'authorization: :censored:30:f914b1b0d1:'
+      );
+    });
+  });
+
+  it('should refuse to log headers that arrived as strings', () => {
+    const bundle = {
+      authData: {
+        key: 'verysecret'
+      },
+      headers: {
+        request_headers: 'authorization: basic dmVyeXNlY3JldA==',
+        response_headers: 'authorization: basic dmVyeXNlY3JldA=='
+      }
+    };
+    const logger = createlogger({ bundle }, options);
+
+    return logger('123 from url google.com', bundle.headers).then(response => {
+      response.status.should.eql(200);
+      const j = response.content.json;
+      j.data.request_headers.should.eql(
+        'ERR - refusing to log possibly uncensored headers'
+      );
+      j.data.response_headers.should.eql(
+        'ERR - refusing to log possibly uncensored headers'
+      );
+    });
+  });
+
   it('should replace sensitive data inside strings', () => {
     const bundle = {
       authData: {
         password: 'secret',
-        key: 'notell'
+        key: 'notell',
+        api_key: 'pa$$word'
       }
     };
     const logger = createlogger({ bundle }, options);
@@ -88,7 +179,10 @@ describe('logger', () => {
       response_content: `{
         "something": "secret",
         "somethingElse": "notell",
-      }`
+      }`,
+      request_url: `https://test.com/?${querystring.stringify({
+        api_key: 'pa$$word'
+      })}`
     };
 
     return logger('test', data).then(response => {
@@ -101,6 +195,7 @@ describe('logger', () => {
         "something": ":censored:6:a5023f748d:",
         "somethingElse": ":censored:6:8f63f9ff57:",
       }`,
+          request_url: 'https://test.com/?api_key=:censored:8:f274744218:',
           log_type: 'console'
         }
       });

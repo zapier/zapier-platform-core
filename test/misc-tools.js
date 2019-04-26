@@ -58,7 +58,7 @@ describe('Tools', () => {
   it('should truncate many things!', () => {
     const tests = [
       { value: null, length: 5, suffix: undefined, expected: '' },
-      { value: undefined, length: 5, suffix: '...', expected: '' },
+      { value: undefined, length: 5, suffix: '...', expected: undefined },
       { value: false, length: 5, suffix: '...', expected: '' },
       { value: '', length: 5, suffix: undefined, expected: '' },
       { value: [], length: 5, suffix: '...', expected: '' },
@@ -92,9 +92,9 @@ describe('Tools', () => {
     ];
 
     tests.forEach(test => {
-      dataTools
-        .simpleTruncate(test.value, test.length, test.suffix)
-        .should.eql(test.expected);
+      should(
+        dataTools.simpleTruncate(test.value, test.length, test.suffix)
+      ).eql(test.expected);
     });
   });
 
@@ -177,6 +177,40 @@ describe('Tools', () => {
         'a.b': 1,
         'a.c': 2,
         'a.d.e': 3,
+        'a.f': null,
+        g: [4],
+        h: 5,
+        i: undefined
+      });
+    });
+
+    it('should flatten things but preserve values from provided keys', () => {
+      const output = dataTools.flattenPaths(
+        {
+          a: {
+            b: 1,
+            c: 2,
+            d: {
+              e: 3,
+              z: {
+                y: 'because'
+              }
+            },
+            f: null
+          },
+          g: [4],
+          h: 5,
+          i: undefined
+        },
+        { preserve: { 'a.d': true } }
+      );
+
+      output.should.eql({
+        'a.b': 1,
+        'a.c': 2,
+        'a.d.e': 3,
+        'a.d.z': { y: 'because' },
+        'a.d.z.y': 'because',
         'a.f': null,
         g: [4],
         h: 5,

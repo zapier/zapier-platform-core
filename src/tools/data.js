@@ -14,6 +14,18 @@ const isPlainObj = o => {
 
 const comparison = (obj, needle) => obj === needle;
 
+const getObjectType = obj => {
+  if (_.isPlainObject(obj)) {
+    return 'Object';
+  }
+
+  if (Array.isArray(obj)) {
+    return 'Array';
+  }
+
+  return _.capitalize(typeof obj);
+};
+
 // Returns a path for the deeply nested haystack where
 // you could find the needle. If the needle is a plain
 // object we try _.isEqual (which could be slow!).
@@ -130,15 +142,17 @@ const recurseExtract = (obj, matcher) => {
 const _IGNORE = {};
 
 // Flatten a nested object.
-const flattenPaths = (data, sep) => {
-  sep = sep || '.';
+const flattenPaths = (data, { preserve = {} } = {}) => {
   const out = {};
-  const recurse = (obj, prop) => {
-    prop = prop || '';
-    if (isPlainObj(obj)) {
-      Object.keys(obj).map(key => {
-        const value = obj[key];
-        const newProp = prop ? prop + sep + key : key;
+  const recurse = (obj, prop = '') => {
+    if (_.isPlainObject(obj)) {
+      Object.entries(obj).forEach(([key, value]) => {
+        const newProp = prop ? `${prop}.${key}` : key;
+
+        if (preserve[prop]) {
+          out[newProp] = value;
+        }
+
         const subValue = recurse(value, newProp);
         if (subValue !== _IGNORE) {
           out[newProp] = subValue;
@@ -155,6 +169,9 @@ const flattenPaths = (data, sep) => {
 
 // A simpler, and memory-friendlier version of _.truncate()
 const simpleTruncate = (string, length, suffix) => {
+  if (string === undefined) {
+    return string;
+  }
   if (!string || !string.toString) {
     return '';
   }
@@ -174,15 +191,16 @@ const simpleTruncate = (string, length, suffix) => {
 const genId = () => parseInt(Math.random() * 100000000);
 
 module.exports = {
-  isPlainObj,
-  findMapDeep,
-  memoizedFindMapDeep,
   deepCopy,
-  jsonCopy,
   deepFreeze,
-  recurseReplace,
-  recurseExtract,
+  findMapDeep,
   flattenPaths,
-  simpleTruncate,
-  genId
+  genId,
+  getObjectType,
+  isPlainObj,
+  jsonCopy,
+  memoizedFindMapDeep,
+  recurseExtract,
+  recurseReplace,
+  simpleTruncate
 };

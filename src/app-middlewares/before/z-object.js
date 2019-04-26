@@ -7,6 +7,7 @@ const createDehydrator = require('../../tools/create-dehydrator');
 const createFileStasher = require('../../tools/create-file-stasher');
 const createJSONtool = require('../../tools/create-json-tool');
 const createStoreKeyTool = require('../../tools/create-storekey-tool');
+const createCallbackHigherOrderFunction = require('../../tools/create-callback-wrapper');
 const createLegacyScriptingRunner = require('../../tools/create-legacy-scripting-runner');
 const createLoggerConsole = require('../../tools/create-logger-console');
 const errors = require('../../errors');
@@ -19,12 +20,15 @@ const injectZObject = input => {
   const bundle = _.get(input, '_zapier.event.bundle', {});
   const zRoot = {
     console: createLoggerConsole(input),
-    JSON: createJSONtool(),
-    hash: hashing.hashify,
-    dehydrate: createDehydrator(input),
-    stashFile: createFileStasher(input),
     cursor: createStoreKeyTool(input),
-    errors
+    dehydrate: createDehydrator(input, 'method'),
+    dehydrateFile: createDehydrator(input, 'file'),
+    errors,
+    generateCallbackUrl: createCallbackHigherOrderFunction(input),
+    hash: hashing.hashify,
+    JSON: createJSONtool(),
+    require: moduleName => require(moduleName),
+    stashFile: createFileStasher(input)
   };
 
   let zSkinny = _.extend({}, zRoot);
@@ -33,10 +37,9 @@ const injectZObject = input => {
     request: createAppRequestClient(input, { extraArgs: [zSkinny, bundle] })
   });
 
-  const app = _.get(input, '_zapier.app');
-  const runner = createLegacyScriptingRunner(z, app);
+  const runner = createLegacyScriptingRunner(z, input);
   if (runner) {
-    z.legacyScripting = runner;
+    z.legacyScripting = zSkinny.legacyScripting = runner;
   }
 
   return _.extend({}, input, { z });

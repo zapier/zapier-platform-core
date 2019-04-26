@@ -17,7 +17,8 @@ describe('create-app', () => {
   const createTestInput = method => {
     const event = {
       bundle: {},
-      method
+      method,
+      callbackUrl: 'calback_url'
     };
 
     return createInput(appDefinition, event, testLogger);
@@ -105,7 +106,7 @@ describe('create-app', () => {
 
     app(input)
       .then(output => {
-        // zapier-httpbin.herokuapp.com/get puts request headers in the response body (good for testing):
+        // httpbin.org/get puts request headers in the response body (good for testing):
         should.exist(output.results.headers);
 
         // verify that custom http before middleware was applied
@@ -130,10 +131,10 @@ describe('create-app', () => {
       })
       .catch(err => {
         should(err.message).startWith(
-          'Got 403 calling GET http://zapier-httpbin.herokuapp.com/status/403, expected 2xx.\nWhat happened:\n  Starting GET request to http://zapier-httpbin.herokuapp.com/status/403\n  Received 403 code from http://zapier-httpbin.herokuapp.com/status/403 after '
+          'Got 403 calling GET https://httpbin.org/status/403, expected 2xx.\nWhat happened:\n  Starting GET request to https://httpbin.org/status/403\n  Received 403 code from https://httpbin.org/status/403 after '
         );
         should(err.message).endWith(
-          'ms\n  Received content ""\n  Got 403 calling GET http://zapier-httpbin.herokuapp.com/status/403, expected 2xx.'
+          'ms\n  Received content ""\n  Got 403 calling GET https://httpbin.org/status/403, expected 2xx.'
         );
         done();
       })
@@ -149,10 +150,10 @@ describe('create-app', () => {
       })
       .catch(err => {
         should(err.message).startWith(
-          'Got 403 calling GET http://zapier-httpbin.herokuapp.com/status/403, expected 2xx.\nWhat happened:\n  Starting GET request to http://zapier-httpbin.herokuapp.com/status/403\n  Received 403 code from http://zapier-httpbin.herokuapp.com/status/403 after '
+          'Got 403 calling GET https://httpbin.org/status/403, expected 2xx.\nWhat happened:\n  Starting GET request to https://httpbin.org/status/403\n  Received 403 code from https://httpbin.org/status/403 after '
         );
         should(err.message).endWith(
-          'ms\n  Received content ""\n  Got 403 calling GET http://zapier-httpbin.herokuapp.com/status/403, expected 2xx.'
+          'ms\n  Received content ""\n  Got 403 calling GET https://httpbin.org/status/403, expected 2xx.'
         );
         done();
       })
@@ -266,9 +267,7 @@ describe('create-app', () => {
     const input = createTestInput('triggers.contactList.operation.perform');
     app(input)
       .then(output => {
-        output.results.url.should.eql(
-          'http://zapier-httpbin.herokuapp.com/get'
-        );
+        output.results.url.should.eql('https://httpbin.org/get');
         output.results.headers['X-Hashy'].should.eql(
           '1a3ba5251cb33ee7ade01af6a7b960b8'
         );
@@ -321,16 +320,14 @@ describe('create-app', () => {
       command: 'request',
       bundle: {
         request: {
-          url: 'http://zapier-httpbin.herokuapp.com/get'
+          url: 'https://httpbin.org/get'
         }
       }
     });
     app(input)
       .then(output => {
         const response = output.results;
-        JSON.parse(response.content).url.should.eql(
-          'http://zapier-httpbin.herokuapp.com/get'
-        );
+        JSON.parse(response.content).url.should.eql('https://httpbin.org/get');
         done();
       })
       .catch(done);
@@ -354,7 +351,7 @@ describe('create-app', () => {
         command: 'execute',
         bundle: {
           inputData: {
-            url: 'http://zapier-httpbin.herokuapp.com/status/401'
+            url: 'https://httpbin.org/status/401'
           }
         },
         method: 'resources.executeRequestAsShorthand.list.operation.perform'
@@ -387,13 +384,45 @@ describe('create-app', () => {
         bundle: {
           inputData: {
             options: {
-              url: 'http://zapier-httpbin.herokuapp.com/status/401'
+              url: 'https://httpbin.org/status/401'
             }
           }
         },
         method: 'resources.executeRequestAsFunc.list.operation.perform'
       };
       oauth2App(createInput(oauth2AppDefinition, event, testLogger))
+        .then(() => {
+          done('expected an error, got success');
+        })
+        .catch(error => {
+          error.name.should.eql('RefreshAuthError');
+          done();
+        });
+    });
+
+    it('should be applied to session auth app on z.request in functions', done => {
+      const sessionAuthAppDefinition = dataTools.deepCopy(appDefinition);
+      sessionAuthAppDefinition.authentication = {
+        type: 'session',
+        test: {},
+        sessionConfig: {
+          perform: {} // stub, not needed for this test
+        }
+      };
+      const sessionAuthApp = createApp(sessionAuthAppDefinition);
+
+      const event = {
+        command: 'execute',
+        bundle: {
+          inputData: {
+            options: {
+              url: 'https://httpbin.org/status/401'
+            }
+          }
+        },
+        method: 'resources.executeRequestAsFunc.list.operation.perform'
+      };
+      sessionAuthApp(createInput(sessionAuthAppDefinition, event, testLogger))
         .then(() => {
           done('expected an error, got success');
         })
@@ -482,6 +511,103 @@ describe('create-app', () => {
           done();
         })
         .catch(done);
+    });
+  });
+  describe('calling a callback method', () => {
+    let results;
+    before(() =>
+      app(
+        createTestInput(
+          'resources.executeCallbackRequest.list.operation.perform'
+        )
+      ).then(output => {
+        results = output;
+      })
+    );
+
+    it('returns a CALLBACK envelope', () =>
+      results.status.should.eql('CALLBACK'));
+    it('returns the methods values', () =>
+      results.results.should.eql({ callbackUrl: 'calback_url' }));
+  });
+
+  describe('using require', () => {
+    const createDefinition = source => ({
+      triggers: {
+        testRequire: {
+          display: {
+            label: 'Test Require',
+            description: 'Put zRequire through the ringer'
+          },
+          key: 'testRequire',
+          operation: {
+            perform: {
+              source
+            }
+          }
+        }
+      }
+    });
+
+    it('should throw a require error', async () => {
+      const definition = createDefinition(`
+        const crypto = require('crypto');
+        return crypto.createHash('md5').update('abc').digest('hex');
+      `);
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appFail = createApp(definition);
+
+      try {
+        await appFail(input);
+      } catch (error) {
+        error.name.should.eql('RequireModuleError');
+        error.message.should.eql(
+          [
+            'For technical reasons, use z.require() instead of require().',
+            'What happened:',
+            '  Executing triggers.testRequire.operation.perform with bundle',
+            '  For technical reasons, use z.require() instead of require().'
+          ].join('\n')
+        );
+      }
+    });
+
+    it('should import and use the crypto module from node', async () => {
+      const definition = createDefinition(`
+        const crypto = z.require('crypto');
+        return crypto.createHash('md5').update('abc').digest('hex');
+      `);
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appPass = createApp(definition);
+      const { results } = await appPass(input);
+      results.should.eql('900150983cd24fb0d6963f7d28e17f72');
+    });
+
+    it('should handle require errors', async () => {
+      const definition = createDefinition(`
+        const moment = z.require('moment');
+        return moment(new Date).format(YYYY-MM-DD);
+      `);
+
+      const input = createTestInput('triggers.testRequire.operation.perform');
+
+      const appFail = createApp(definition);
+
+      try {
+        await appFail(input);
+      } catch (error) {
+        error.name.should.eql('Error');
+        error.message.should.eql(
+          [
+            "Cannot find module 'moment'",
+            'What happened:',
+            '  Executing triggers.testRequire.operation.perform with bundle',
+            "  Cannot find module 'moment'"
+          ].join('\n')
+        );
+      }
     });
   });
 });

@@ -13,7 +13,10 @@ const RESPONSE_SIZE_LIMIT = 6291456;
 
 const HYDRATE_DIRECTIVE_HOIST = '$HOIST$';
 
-const RENDER_ONLY_METHODS = ['authentication.oauth2Config.authorizeUrl'];
+const RENDER_ONLY_METHODS = [
+  'authentication.oauth2Config.authorizeUrl',
+  'authentication.oauth1Config.authorizeUrl'
+];
 
 const REQUEST_OBJECT_SHORTHAND_OPTIONS = { replace: true };
 
@@ -50,6 +53,10 @@ const SAFE_LOG_KEYS = [
   'selected_api',
   'timestamp'
 ];
+const STATUSES = {
+  CALLBACK: 'CALLBACK',
+  SUCCESS: 'SUCCESS'
+};
 
 module.exports = {
   IS_TESTING,
@@ -62,5 +69,6 @@ module.exports = {
   DEFAULT_LOGGING_HTTP_ENDPOINT,
   DEFAULT_LOGGING_HTTP_API_KEY,
   SENSITIVE_KEYS,
-  SAFE_LOG_KEYS
+  SAFE_LOG_KEYS,
+  STATUSES
 };

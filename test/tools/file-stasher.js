@@ -100,10 +100,9 @@ describe('file upload', () => {
     mocky.mockUpload();
 
     const request = createAppRequestClient(input);
-    const file = request(
-      'http://zapier-httpbin.herokuapp.com/stream-bytes/1024',
-      { raw: true }
-    );
+    const file = request('https://httpbin.org/stream-bytes/1024', {
+      raw: true
+    });
     stashFile(file)
       .then(url => {
         should(url).eql(
@@ -216,6 +215,34 @@ describe('file upload', () => {
 
     const file = 'hello world this is a plain blob of text';
     stashFileTest(file)
+      .then(url => {
+        should(url).eql(
+          `${mocky.fakeSignedPostData.url}${
+            mocky.fakeSignedPostData.fields.key
+          }`
+        );
+        done();
+      })
+      .catch(done);
+  });
+
+  it('should get filename from content-disposition', done => {
+    mocky.mockRpcCall(mocky.fakeSignedPostData);
+
+    // Expect to have this part in the request body sent to S3
+    mocky.mockUpload(
+      /name="Content-Disposition"\r\n\r\nattachment; filename="an example\.json"/
+    );
+
+    const request = createAppRequestClient(input);
+    const file = request({
+      url: 'https://httpbin.org/response-headers',
+      params: {
+        'Content-Disposition': 'inline; filename="an example.json"'
+      },
+      raw: true
+    });
+    stashFile(file)
       .then(url => {
         should(url).eql(
           `${mocky.fakeSignedPostData.url}${
