@@ -110,9 +110,39 @@ const createBundleBank = (appRaw, event = {}) => {
 
 const maskOutput = output => _.pick(output, 'results', 'status');
 
+const normalizeEmptyRequestField = (shouldCleanup, field) => req => {
+  const handleEmpty = req.removeMissingValuesFrom[field]
+    ? key => delete req[field][key]
+    : key => (req[field][key] = '');
+
+  return ([key, value]) => {
+    if (shouldCleanup(value)) {
+      handleEmpty(key);
+    }
+  };
+};
+
+const isCurlies = /{{.*?}}/;
+const isEmptyQueryParam = value =>
+  value === '' ||
+  value === null ||
+  value === undefined ||
+  isCurlies.test(value);
+
+const normalizeEmptyParamField = normalizeEmptyRequestField(
+  isEmptyQueryParam,
+  'params'
+);
+const normalizeEmptyBodyField = normalizeEmptyRequestField(
+  v => isCurlies.test(v),
+  'body'
+);
+
 module.exports = {
-  recurseCleanFuncs,
-  recurseReplaceBank,
   createBundleBank,
-  maskOutput
+  maskOutput,
+  normalizeEmptyBodyField,
+  normalizeEmptyParamField,
+  recurseCleanFuncs,
+  recurseReplaceBank
 };
