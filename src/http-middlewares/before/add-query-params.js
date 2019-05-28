@@ -1,7 +1,7 @@
 'use strict';
 
 const querystring = require('querystring');
-const { normalizeEmptyParamField } = require('../../tools/cleaner');
+const { normalizeEmptyParamFields } = require('../../tools/cleaner');
 
 const hasQueryParams = ({ params = {} }) => Object.keys(params).length;
 
@@ -12,7 +12,7 @@ const addQueryParams = req => {
   if (hasQueryParams(req)) {
     const splitter = req.url.includes('?') ? '&' : '?';
 
-    Object.entries(req.params).forEach(normalizeEmptyParamField(req));
+    normalizeEmptyParamFields(req);
 
     const stringifiedParams = querystring.stringify(req.params);
 

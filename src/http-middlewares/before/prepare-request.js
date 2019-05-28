@@ -6,7 +6,7 @@ const querystring = require('querystring');
 
 const {
   createBundleBank,
-  normalizeEmptyBodyField,
+  normalizeEmptyBodyFields,
   recurseReplaceBank
 } = require('../../tools/cleaner');
 const requestMerge = require('../../tools/request-merge');
@@ -60,7 +60,7 @@ const coerceBody = req => {
   } else if (Buffer.isBuffer(req.body)) {
     // leave a buffer alone!
   } else if (req.body && !_.isString(req.body)) {
-    Object.entries(req.body).forEach(normalizeEmptyBodyField(req));
+    normalizeEmptyBodyFields(req);
 
     // this is a general - popular fallback
     req.body = JSON.stringify(req.body);
