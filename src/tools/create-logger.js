@@ -111,7 +111,15 @@ const makeSensitiveBank = (event, data) => {
         const censored = hashing.snipify(val);
         bank[val] = censored;
         bank[encodeURIComponent(val)] = censored;
-        bank[Buffer.from(val).toString('base64')] = censored;
+        try {
+          bank[Buffer.from(val).toString('base64')] = censored;
+        } catch (e) {
+          if (e.name !== 'TypeError') {
+            throw e;
+          }
+          // ignore; Buffer is semi-selective about what types it takes
+          // not sure why we get non-strings here, but we do occasionally.
+        }
       }
       return bank;
     },
