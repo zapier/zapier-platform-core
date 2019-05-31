@@ -43,27 +43,34 @@ const recurseCleanFuncs = (obj, path) => {
 
 // Recurse a nested object replace all instances of keys->vals in the bank.
 const recurseReplaceBank = (obj, bank = {}) => {
+  console.log('build blank');
   const replacer = out => {
-    if (typeof out === 'number') {
-      out = String(out);
+    if (out === 314159265) {
+      console.log('replacing');
     }
-    if (typeof out !== 'string') {
+    if (!['string', 'number'].includes(typeof out)) {
       return out;
     }
+
+    if (out === 314159265) {
+      debugger; // eslint-disable-line no-debugger
+      console.log('stayed');
+    }
+    let str = String(out);
 
     Object.keys(bank).forEach(key => {
       // Escape characters (ex. {{foo}} => \\{\\{foo\\}\\} )
       const escapedKey = key.replace(/[-[\]/{}()\\*+?.^$|]/g, '\\$&');
       const matchesKey = new RegExp(escapedKey, 'g');
 
-      if (!matchesKey.test(out)) {
+      if (!matchesKey.test(str)) {
         return;
       }
 
       const matchesCurlies = /({{.*?}})/;
-      const valueParts = out.split(matchesCurlies).filter(Boolean);
+      const valueParts = str.split(matchesCurlies).filter(Boolean);
       const replacementValue = bank[key];
-      const isPartOfString = !matchesCurlies.test(out) || valueParts.length > 1;
+      const isPartOfString = !matchesCurlies.test(str) || valueParts.length > 1;
       const shouldThrowTypeError =
         isPartOfString &&
         (Array.isArray(replacementValue) || _.isPlainObject(replacementValue));
@@ -76,12 +83,12 @@ const recurseReplaceBank = (obj, bank = {}) => {
         );
       }
 
-      out = isPartOfString
+      str = isPartOfString
         ? valueParts.join('').replace(matchesKey, replacementValue)
         : replacementValue;
     });
 
-    return out;
+    return str;
   };
   return recurseReplace(obj, replacer);
 };

@@ -245,7 +245,7 @@ describe('logger', () => {
     });
   });
 
-  it('should replace sensitive data that is not a string', () => {
+  it.only('should replace sensitive data that is not a string', () => {
     const bundle = {
       authData: {
         numerical_token: 314159265
