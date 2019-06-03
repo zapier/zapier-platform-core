@@ -583,7 +583,7 @@ describe('request client', () => {
       });
     });
 
-    it.only('should keep valid data types that are hard-coded', () => {
+    it('should keep valid data types that are hard-coded', () => {
       // This may seem like an usual case to be in, and for most apps it is.
       // However, converted apps that rely on legacy-scripting-runner can have
       // request bodies that are pure data, no {{}}, so we need to be sure to preserve those to
