@@ -1,3 +1,9 @@
+# MOVED
+
+This code has been moved to: https://github.com/zapier/zapier-platform/tree/master/packages/core
+
+---
+
 # Core for Zapier CLI Platform [![Travis](https://img.shields.io/travis/zapier/zapier-platform-core.svg)](https://travis-ci.org/zapier/zapier-platform-core)
 
 This is the code that powers our [Zapier Platform CLI](https://zapier.github.io/zapier-platform-cli). You'll want to head to that repo to see how it's used.
